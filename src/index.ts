@@ -37,16 +37,16 @@ const currentFilename = 'current.js'
             tree_sha: payload.before,
         });
 
-        for (const file of commit.data.files) {
-            if (file.status !== 'modified' || (file.filename !== 'shared.current.css' && file.filename !== 'app.current.css')) {
+        for (const commitFile of commit.data.files) {
+            if (commitFile.status !== 'modified' || (commitFile.filename !== 'shared.current.css' && commitFile.filename !== 'app.current.css')) {
                 continue;
             }
 
-            console.log(`${file.filename} was modified.`);
-            console.log(file);
+            console.log(`${commitFile.filename} was modified.`);
+            console.log(commitFile);
 
-            let fileSha = file.sha;
-            const currentFileSha = currentTree?.data?.tree?.find?.(file => file.path === currentFilename)?.sha;
+            let fileSha = commitFile.sha;
+            const currentFileSha = currentTree?.data?.tree?.find?.(file => file.path === commitFile.filename)?.sha;
             if (!currentFileSha) {
                 return info('Failed to find current file.');
             }
