@@ -4225,7 +4225,7 @@ var _this = this;
                                     g = Buffer.from(v.data.content, "base64").toString("utf8");
                                     w = void 0;
                                     try {
-                                        console.log(h, g);
+                                        console.log(h.length, g.length);
                                         w = "idk if this workie";
                                     }
                                     catch (e) {

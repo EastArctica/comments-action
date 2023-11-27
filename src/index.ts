@@ -69,7 +69,7 @@ const currentFilename = 'current.js'
 
             let diff: string;
             try {
-                console.log(currentContent, newContent);
+                console.log(currentContent.length, newContent.length);
                 diff = 'idk if this workie';
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);
