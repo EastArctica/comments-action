@@ -42,10 +42,7 @@ const token = process.env.GITHUB_TOKEN
             if (commitFile.status !== 'modified' || (commitFile.filename !== 'shared.current.css' && commitFile.filename !== 'app.current.css')) {
                 continue;
             }
-
-            console.log(`${commitFile.filename} was modified.`);
-            console.log(commitFile);
-
+            
             let newFileSha = commitFile.sha;
             const oldFileSha = oldTree?.data?.tree?.find?.(file => file.path === commitFile.filename)?.sha;
             if (!oldFileSha) {
@@ -72,7 +69,13 @@ const token = process.env.GITHUB_TOKEN
             try {
                 console.log(oldContent.length, newContent.length);
                 // diffCss(oldContent, newContent);
-                diff = createPatch(commitFile.filename, css_beautify(oldContent), css_beautify(newContent));
+                diff = createPatch(commitFile.filename,
+                    css_beautify(oldContent, {
+                        indent_size: 2,
+                    }),
+                    css_beautify(newContent, {
+                        indent_size: 2,
+                    }));
                 diff = `\`\`\`diff\n${diff}\`\`\``;
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);

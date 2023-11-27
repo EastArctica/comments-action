@@ -7844,8 +7844,6 @@ var _this = this;
                                     if (a_22.status !== "modified" || a_22.filename !== "shared.current.css" && a_22.filename !== "app.current.css") {
                                         return [2 /*return*/, "continue"];
                                     }
-                                    console.log("".concat(a_22.filename, " was modified."));
-                                    console.log(a_22);
                                     r_6 = a_22.sha;
                                     m_1 = (d = (n = (s = (e = h === null || h === void 0 ? void 0 : h.data) === null || e === void 0 ? void 0 : e.tree) === null || s === void 0 ? void 0 : s.find) === null || n === void 0 ? void 0 : n.call(s, (function (e) { return e.path === a_22.filename; }))) === null || d === void 0 ? void 0 : d.sha;
                                     if (!m_1) {
@@ -7862,7 +7860,7 @@ var _this = this;
                                     b = void 0;
                                     try {
                                         console.log(g.length, w.length);
-                                        b = (0, p.createPatch)(a_22.filename, (0, i.css_beautify)(g), (0, i.css_beautify)(w));
+                                        b = (0, p.createPatch)(a_22.filename, (0, i.css_beautify)(g, { indent_size: 2 }), (0, i.css_beautify)(w, { indent_size: 2 }));
                                         b = "```diff\n".concat(b, "```");
                                     }
                                     catch (e) {
