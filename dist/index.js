@@ -4176,80 +4176,77 @@ var _this = this;
         var p = __nccwpck_require__(5681);
         var a = __nccwpck_require__(4128);
         var d = process.env.GITHUB_TOKEN;
-        var t = /(?:\/\d{4}\/(?:\d{4}-\d{2}-\d{2}|\d{2}\/\d{2})\/[a-z0-9]{20,}|current)\.js$/;
-        var r = "current.js";
-        !(function () { return __awaiter(_this, void 0, void 0, function () { var e, s, i, o, n, l, m, u, _a, c, v, h, g, w, _, _i, _b, e_52, _c, T, E, b, y, S, D, P, O, A, e_51; return __generator(this, function (_d) {
-            switch (_d.label) {
+        var t = "current.js";
+        !(function () { return __awaiter(_this, void 0, void 0, function () { var e, r, s, i, o, _a, n, l, m, u, c, v, _i, _b, a_22, d_17, m_1, c_1, h, g, w, _, e_51; return __generator(this, function (_c) {
+            switch (_c.label) {
                 case 0:
-                    _d.trys.push([0, 6, , 7]);
+                    _c.trys.push([0, 9, , 10]);
                     if (!d) {
                         return [2 /*return*/, (0, p.setFailed)("Invalid GITHUB_TOKEN")];
                     }
-                    u = (0, a.getOctokit)(d);
-                    console.log(a.context);
-                    _a = a.context.repo, c = _a.owner, v = _a.repo;
+                    o = (0, a.getOctokit)(d);
+                    _a = a.context.repo, n = _a.owner, l = _a.repo;
                     if (a.context.eventName !== "push") {
                         return [2 /*return*/];
                     }
-                    h = a.context.payload;
-                    g = h.after;
-                    return [4 /*yield*/, u.rest.repos.getCommit({ owner: c, repo: v, ref: g })];
+                    m = a.context.payload;
+                    u = m.after;
+                    return [4 /*yield*/, o.rest.repos.getCommit({ owner: n, repo: l, ref: u })];
                 case 1:
-                    w = _d.sent();
-                    if (!w) {
-                        return [2 /*return*/, (0, p.setFailed)("commit not found")];
+                    c = _c.sent();
+                    if (!c) {
+                        return [2 /*return*/, (0, p.setFailed)("Failed to find commit.")];
                     }
-                    _ = (e = w.data.files) === null || e === void 0 ? void 0 : e[0];
-                    for (_i = 0, _b = w.data.files; _i < _b.length; _i++) {
-                        e_52 = _b[_i];
-                        if (_.status !== "modified" || _.filename !== "shared.current.css" && _.filename !== "app.current.css") {
-                            continue;
-                        }
-                        console.log("".concat(_.filename, " was modified."));
-                        console.log(_);
-                    }
-                    _c = (i = (s = w === null || w === void 0 ? void 0 : w.data) === null || s === void 0 ? void 0 : s.files) === null || i === void 0 ? void 0 : i[0], T = _c.blob_url, E = _c.sha;
-                    if (!(t === null || t === void 0 ? void 0 : t.test(decodeURIComponent(T)))) {
-                        return [2 /*return*/, (0, p.info)("not a build file")];
-                    }
-                    return [4 /*yield*/, u.rest.git.getTree({ owner: c, repo: v, tree_sha: h.before })];
+                    return [4 /*yield*/, o.rest.git.getTree({ owner: n, repo: l, tree_sha: m.before })];
                 case 2:
-                    b = _d.sent();
-                    y = (m = (l = (n = (o = b === null || b === void 0 ? void 0 : b.data) === null || o === void 0 ? void 0 : o.tree) === null || n === void 0 ? void 0 : n.find) === null || l === void 0 ? void 0 : l.call(n, (function (e) { return e.path === r; }))) === null || m === void 0 ? void 0 : m.sha;
-                    if (!y) {
-                        return [2 /*return*/, (0, p.info)("no current file")];
-                    }
-                    return [4 /*yield*/, u.rest.git.getBlob({ owner: c, repo: v, file_sha: y })];
+                    v = _c.sent();
+                    _i = 0, _b = c.data.files;
+                    _c.label = 3;
                 case 3:
-                    S = _d.sent();
-                    return [4 /*yield*/, u.rest.git.getBlob({ owner: c, repo: v, file_sha: E })];
-                case 4:
-                    D = _d.sent();
-                    P = Buffer.from(S.data.content, "base64").toString("utf8");
-                    O = Buffer.from(D.data.content, "base64").toString("utf8");
-                    if ((0, p.isDebug)()) {
-                        (0, p.debug)("".concat(P.length));
-                        (0, p.debug)("".concat(O.length));
+                    if (!(_i < _b.length)) return [3 /*break*/, 8];
+                    a_22 = _b[_i];
+                    if (a_22.status !== "modified" || a_22.filename !== "shared.current.css" && a_22.filename !== "app.current.css") {
+                        return [3 /*break*/, 7];
                     }
-                    A = void 0;
+                    console.log("".concat(a_22.filename, " was modified."));
+                    console.log(a_22);
+                    d_17 = a_22.sha;
+                    m_1 = (i = (s = (r = (e = v === null || v === void 0 ? void 0 : v.data) === null || e === void 0 ? void 0 : e.tree) === null || r === void 0 ? void 0 : r.find) === null || s === void 0 ? void 0 : s.call(r, (function (e) { return e.path === t; }))) === null || i === void 0 ? void 0 : i.sha;
+                    if (!m_1) {
+                        return [2 /*return*/, (0, p.info)("Failed to find current file.")];
+                    }
+                    return [4 /*yield*/, o.rest.git.getBlob({ owner: n, repo: l, file_sha: m_1 })];
+                case 4:
+                    c_1 = _c.sent();
+                    return [4 /*yield*/, o.rest.git.getBlob({ owner: n, repo: l, file_sha: d_17 })];
+                case 5:
+                    h = _c.sent();
+                    g = Buffer.from(c_1.data.content, "base64").toString("utf8");
+                    w = Buffer.from(h.data.content, "base64").toString("utf8");
+                    _ = void 0;
                     try {
-                        console.log(P, O);
+                        console.log(g, w);
+                        _ = "idk if this workie";
                     }
                     catch (e) {
                         return [2 /*return*/, (0, p.setFailed)("unable to diff strings: ".concat(e))];
                     }
-                    if (!A) {
+                    if (!_) {
                         return [2 /*return*/, (0, p.info)("no strings changed")];
                     }
-                    return [4 /*yield*/, u.rest.repos.createCommitComment({ owner: c, repo: v, commit_sha: g, body: A })];
-                case 5:
-                    _d.sent();
-                    return [2 /*return*/, (0, p.info)("created commit comment")];
+                    return [4 /*yield*/, o.rest.repos.createCommitComment({ owner: n, repo: l, commit_sha: u, body: _ })];
                 case 6:
-                    e_51 = _d.sent();
+                    _c.sent();
+                    return [2 /*return*/, (0, p.info)("created commit comment")];
+                case 7:
+                    _i++;
+                    return [3 /*break*/, 3];
+                case 8: return [3 /*break*/, 10];
+                case 9:
+                    e_51 = _c.sent();
                     (0, p.setFailed)((0, p.isDebug)() ? e_51.stack : e_51.message);
-                    return [3 /*break*/, 7];
-                case 7: return [2 /*return*/];
+                    return [3 /*break*/, 10];
+                case 10: return [2 /*return*/];
             }
         }); }); })();
     })();
