@@ -1,7 +1,7 @@
 import { info, isDebug, setFailed } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import type { PushEvent } from '@octokit/webhooks-types';
-import { diffCss } from 'diff';
+import { createPatch } from 'diff';
 
 const token = process.env.GITHUB_TOKEN
 
@@ -70,15 +70,8 @@ const token = process.env.GITHUB_TOKEN
             let diff: string;
             try {
                 console.log(oldContent.length, newContent.length);
-                let rawDiff = diffCss(oldContent, newContent);
-                rawDiff.forEach(part => {
-                    if (part.added) {
-                        diff += `+ ${part.value}`;
-                    } else if (part.removed) {
-                        diff += `- ${part.value}`;
-                    }            
-                });
-
+                // diffCss(oldContent, newContent);
+                diff = createPatch(commitFile.filename, oldContent, newContent);
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);
             }

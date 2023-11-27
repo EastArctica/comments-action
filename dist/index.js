@@ -5101,7 +5101,7 @@ var _this = this;
                 case 2:
                     v = _c.sent();
                     _loop_2 = function (a_22) {
-                        var d_9, m_1, c_1, h, g, w, _, e_52;
+                        var d_9, m_1, c_1, h, g, w, _;
                         return __generator(this, function (_d) {
                             switch (_d.label) {
                                 case 0:
@@ -5123,15 +5123,10 @@ var _this = this;
                                     h = _d.sent();
                                     g = Buffer.from(c_1.data.content, "base64").toString("utf8");
                                     w = Buffer.from(h.data.content, "base64").toString("utf8");
+                                    _ = void 0;
                                     try {
                                         console.log(g.length, w.length);
-                                        e_52 = (0, t.diffCss)(g, w);
-                                        e_52.forEach((function (e) { if (e.added) {
-                                            _ += "+ ".concat(e.value);
-                                        }
-                                        else if (e.removed) {
-                                            _ += "- ".concat(e.value);
-                                        } }));
+                                        _ = (0, t.createPatch)(a_22.filename, g, w);
                                     }
                                     catch (e) {
                                         return [2 /*return*/, { value: (0, p.setFailed)("unable to diff strings: ".concat(e)) }];
