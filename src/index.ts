@@ -2,6 +2,7 @@ import { info, isDebug, setFailed } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import type { PushEvent } from '@octokit/webhooks-types';
 import { createPatch } from 'diff';
+import { css_beautify } from 'js-beautify';
 
 const token = process.env.GITHUB_TOKEN
 
@@ -71,7 +72,8 @@ const token = process.env.GITHUB_TOKEN
             try {
                 console.log(oldContent.length, newContent.length);
                 // diffCss(oldContent, newContent);
-                diff = createPatch(commitFile.filename, oldContent, newContent);
+                diff = createPatch(commitFile.filename, css_beautify(oldContent), css_beautify(newContent));
+                
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);
             }
