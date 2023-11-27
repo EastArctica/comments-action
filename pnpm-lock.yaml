@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@actions/core':
     specifier: ^1.9.1
@@ -10,11 +14,17 @@ dependencies:
   '@adryd325/discord-datamining-lang-differ':
     specifier: github:adryd325/discord-datamining-lang-differ#ec426f9422b7b85a9dac45a8bfd7a6926c0b9474
     version: github.com/adryd325/discord-datamining-lang-differ/ec426f9422b7b85a9dac45a8bfd7a6926c0b9474
+  diff:
+    specifier: ^5.1.0
+    version: 5.1.0
 
 devDependencies:
   '@octokit/webhooks-types':
     specifier: ^6.3.6
     version: 6.3.6
+  '@types/diff':
+    specifier: ^5.0.8
+    version: 5.0.8
   '@types/node':
     specifier: ^18.7.23
     version: 18.7.23
@@ -159,6 +169,10 @@ packages:
     resolution: {integrity: sha512-x6yBtWobk20OhOiJ4VWsH3iJ/30IG+VoDWSgS4Tiyidi2KOiBS3bL+AJrNuq4OyNuWOM/FbHQTp6KEZs1oPD/g==}
     dev: true
 
+  /@types/diff@5.0.8:
+    resolution: {integrity: sha512-kR0gRf0wMwpxQq6ME5s+tWk9zVCfJUl98eRkD05HWWRbhPB/eu4V1IbyZAsvzC1Gn4znBJ0HN01M4DGXdBEV8Q==}
+    dev: true
+
   /@types/node@18.7.23:
     resolution: {integrity: sha512-DWNcCHolDq0ZKGizjx2DZjR/PqsYwAcYUJmfMWqtVU2MBMG5Mo+xFZrhGId5r/O5HOuMPyQEcM6KUBp5lBZZBg==}
 
@@ -187,6 +201,11 @@ packages:
 
   /deprecation@2.3.1:
     resolution: {integrity: sha512-xmHIy4F3scKVwMsQ4WnVaS8bHOx0DmVwRywosKhaILI0ywMDWPtBSku2HNxRvF7jtwDRsoEwYQSfbxj8b7RlJQ==}
+    dev: false
+
+  /diff@5.1.0:
+    resolution: {integrity: sha512-D+mk+qE8VC/PAUrlAU34N+VfXev0ghe5ywmpqrawphmVZc1bEfn56uo9qpyGp1p4xpzOHkSW4ztBd6L7Xx4ACw==}
+    engines: {node: '>=0.3.1'}
     dev: false
 
   /eslint-visitor-keys@3.4.3:

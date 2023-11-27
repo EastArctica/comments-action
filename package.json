@@ -19,10 +19,12 @@
   "dependencies": {
     "@actions/core": "^1.9.1",
     "@actions/github": "^5.1.0",
-    "@adryd325/discord-datamining-lang-differ": "github:adryd325/discord-datamining-lang-differ#ec426f9422b7b85a9dac45a8bfd7a6926c0b9474"
+    "@adryd325/discord-datamining-lang-differ": "github:adryd325/discord-datamining-lang-differ#ec426f9422b7b85a9dac45a8bfd7a6926c0b9474",
+    "diff": "^5.1.0"
   },
   "devDependencies": {
     "@octokit/webhooks-types": "^6.3.6",
+    "@types/diff": "^5.0.8",
     "@types/node": "^18.7.23",
     "@vercel/ncc": "0.34.0",
     "typescript": "^4.8.3"

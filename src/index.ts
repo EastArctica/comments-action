@@ -1,9 +1,9 @@
-import { debug, info, isDebug, setFailed } from '@actions/core'
-import { context, getOctokit } from '@actions/github'
-import type { PushEvent } from '@octokit/webhooks-types'
+import { info, isDebug, setFailed } from '@actions/core';
+import { context, getOctokit } from '@actions/github';
+import type { PushEvent } from '@octokit/webhooks-types';
+import { diffCss } from 'diff';
 
 const token = process.env.GITHUB_TOKEN
-const currentFilename = 'current.js'
 
 !(async () => {
     try {
@@ -31,7 +31,7 @@ const currentFilename = 'current.js'
             return setFailed('Failed to find commit.');
         }
 
-        const currentTree = await octokit.rest.git.getTree({
+        const oldTree = await octokit.rest.git.getTree({
             owner,
             repo,
             tree_sha: payload.before,
@@ -45,32 +45,40 @@ const currentFilename = 'current.js'
             console.log(`${commitFile.filename} was modified.`);
             console.log(commitFile);
 
-            let fileSha = commitFile.sha;
-            const currentFileSha = currentTree?.data?.tree?.find?.(file => file.path === commitFile.filename)?.sha;
-            if (!currentFileSha) {
-                return info('Failed to find current file.');
+            let newFileSha = commitFile.sha;
+            const oldFileSha = oldTree?.data?.tree?.find?.(file => file.path === commitFile.filename)?.sha;
+            if (!oldFileSha) {
+                return info('Failed to find old file.');
             }
 
-            const currentFile = await octokit.rest.git.getBlob({
+            const oldFile = await octokit.rest.git.getBlob({
                 owner,
                 repo,
-                file_sha: currentFileSha
+                file_sha: oldFileSha
             });
             const newFile = await octokit.rest.git.getBlob({
                 owner,
                 repo,
-                file_sha: fileSha,
+                file_sha: newFileSha,
             });
 
 
 
-            const currentContent = Buffer.from(currentFile.data.content, 'base64').toString('utf8');
+            const oldContent = Buffer.from(oldFile.data.content, 'base64').toString('utf8');
             const newContent = Buffer.from(newFile.data.content, 'base64').toString('utf8');
 
             let diff: string;
             try {
-                console.log(currentContent.length, newContent.length);
-                diff = 'idk if this workie';
+                console.log(oldContent.length, newContent.length);
+                let rawDiff = diffCss(oldContent, newContent);
+                rawDiff.forEach(part => {
+                    if (part.added) {
+                        diff += `+ ${part.value}`;
+                    } else if (part.removed) {
+                        diff += `- ${part.value}`;
+                    }            
+                });
+
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);
             }
