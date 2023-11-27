@@ -7863,6 +7863,7 @@ var _this = this;
                                     try {
                                         console.log(g.length, w.length);
                                         b = (0, p.createPatch)(a_22.filename, (0, i.css_beautify)(g), (0, i.css_beautify)(w));
+                                        b = "```diff\n".concat(b, "```");
                                     }
                                     catch (e) {
                                         return [2 /*return*/, { value: (0, t.setFailed)("unable to diff strings: ".concat(e)) }];

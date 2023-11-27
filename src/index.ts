@@ -73,7 +73,7 @@ const token = process.env.GITHUB_TOKEN
                 console.log(oldContent.length, newContent.length);
                 // diffCss(oldContent, newContent);
                 diff = createPatch(commitFile.filename, css_beautify(oldContent), css_beautify(newContent));
-                
+                diff = `\`\`\`diff\n${diff}\`\`\``;
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);
             }
