@@ -7877,7 +7877,7 @@ var _this = this;
                                         r_7 = [];
                                         for (e_53 = 0; e_53 < a_23.length; e_53++) {
                                             for (t_35 = -5; t_35 < 5; t_35++) {
-                                                if (a_23[e_53 + t_35].toString().includes("\\color{")) {
+                                                if ("".concat(a_23[e_53 + t_35]).toString().includes("\\color{")) {
                                                     r_7.push(a_23[e_53]);
                                                     break;
                                                 }
