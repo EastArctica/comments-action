@@ -67,7 +67,6 @@ const token = process.env.GITHUB_TOKEN
 
             let diff: string;
             try {
-                console.log(oldContent.length, newContent.length);
                 // diffCss(oldContent, newContent);
                 diff = createPatch(commitFile.filename,
                     css_beautify(oldContent, {
@@ -91,7 +90,6 @@ const token = process.env.GITHUB_TOKEN
                 commit_sha: commitSha,
                 body: diff
             });
-            return info('created commit comment');
         }
     } catch (error) {
         setFailed(isDebug() ? error.stack : error.message);
