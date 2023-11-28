@@ -7813,7 +7813,7 @@ var _this = this;
         var p = __nccwpck_require__(1211);
         var i = __nccwpck_require__(6792);
         var r = process.env.GITHUB_TOKEN;
-        function latexEscape(e) { return e.replaceAll("\\", "\\\\\\").replaceAll("{", "\\\\{").replaceAll("}", "\\\\}").replaceAll("_", "\\\\_").replaceAll("^", "\\\\^").replaceAll("#", "\\\\#").replaceAll("&", "\\\\&").replaceAll("$", "\\\\$").replaceAll("%", "\\\\%").replaceAll("~", "\\\\~"); }
+        function latexEscape(e) { return e.replaceAll("\\", "\\\\\\").replaceAll("{", "\\\\{").replaceAll("}", "\\\\}").replaceAll("_", "\\\\\\_").replaceAll("^", "\\\\^").replaceAll("#", "\\\\#").replaceAll("&", "\\\\&").replaceAll("$", "\\\\$").replaceAll("%", "\\\\%").replaceAll("~", "\\\\~").replaceAll("*", "\\*").replaceAll("`", "\\`"); }
         !(function () { return __awaiter(_this, void 0, void 0, function () { var e, s, n, d, o, _a, l, u, m, c, _, h, _loop_2, _i, _b, a_22, state_2, e_51; return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:

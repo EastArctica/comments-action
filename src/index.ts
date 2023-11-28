@@ -12,13 +12,15 @@ function latexEscape(str) {
         .replaceAll('\\', '\\\\\\')
         .replaceAll('{', '\\\\{')
         .replaceAll('}', '\\\\}')
-        .replaceAll('_', '\\\\_')
+        .replaceAll('_', '\\\\\\_') // I have no clue why this needs 3
         .replaceAll('^', '\\\\^')
         .replaceAll('#', '\\\\#')
         .replaceAll('&', '\\\\&')
         .replaceAll('$', '\\\\$')
         .replaceAll('%', '\\\\%')
-        .replaceAll('~', '\\\\~');
+        .replaceAll('~', '\\\\~')
+        .replaceAll('*', '\\*')
+        .replaceAll('`', '\\`');
 }
 
 !(async () => {
