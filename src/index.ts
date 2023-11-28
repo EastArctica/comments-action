@@ -1,10 +1,25 @@
 import { info, isDebug, setFailed } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import type { PushEvent } from '@octokit/webhooks-types';
-import { createPatch } from 'diff';
+import { diffCss } from 'diff';
 import { css_beautify } from 'js-beautify';
 
 const token = process.env.GITHUB_TOKEN
+
+function latexEscape(str) {
+    // https://stackoverflow.com/a/1629466
+    return str
+        .replaceAll('\\', '\\\\\\')
+        .replaceAll('{', '\\\\{')
+        .replaceAll('}', '\\\\}')
+        .replaceAll('_', '\\\\_')
+        .replaceAll('^', '\\\\^')
+        .replaceAll('#', '\\\\#')
+        .replaceAll('&', '\\\\&')
+        .replaceAll('$', '\\\\$')
+        .replaceAll('%', '\\\\%')
+        .replaceAll('~', '\\\\~');
+}
 
 !(async () => {
     try {
@@ -65,17 +80,46 @@ const token = process.env.GITHUB_TOKEN
             const oldContent = Buffer.from(oldFile.data.content, 'base64').toString('utf8');
             const newContent = Buffer.from(newFile.data.content, 'base64').toString('utf8');
 
-            let diff: string;
+            let diff = '';
             try {
-                // diffCss(oldContent, newContent);
-                diff = createPatch(commitFile.filename,
-                    css_beautify(oldContent, {
-                        indent_size: 2,
-                    }),
-                    css_beautify(newContent, {
-                        indent_size: 2,
-                    }));
-                diff = `\`\`\`diff\n${diff}\`\`\``;
+                let rawDiff = diffCss(css_beautify(oldContent, { indent_size: 2 }),
+                    css_beautify(newContent, { indent_size: 2 }));
+                let semiFinalStr = '';
+                
+                rawDiff.forEach((part) => {
+                    // green for additions, red for deletions
+                    // grey for common parts
+                    const color = part.added ? 'green' :
+                        part.removed ? 'red' : false;
+                
+                    // Every line needs to be wrapped in `$\texttt{`
+                    part.value.split('\n').forEach((val, i, arr) => {
+                        // Every space at the beginning
+                        let totalSpaces = 0;
+                        while (val.slice(0, 1) == ' ') {
+                            totalSpaces++;
+                            val = val.slice(1);
+                        }
+                        if (totalSpaces > 0) {
+                            semiFinalStr += `\\hspace\\{${(totalSpaces / 2)}em\\}`;
+                        }
+                
+                        if (color) {
+                            semiFinalStr += `\\color{${color}}`
+                        }
+                
+                        semiFinalStr += latexEscape(val);
+                
+                        // The last item doesn't need a new line
+                        if (i !== arr.length - 1) {
+                            semiFinalStr += '\n';
+                        }
+                    })
+                });
+                
+                semiFinalStr.split('\n').forEach(line => {
+                    diff += `$\\texttt{${line}}$\n`;
+                });
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);
             }
