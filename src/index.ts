@@ -120,6 +120,19 @@ function latexEscape(str) {
                 semiFinalStr.split('\n').forEach(line => {
                     diff += `$\\texttt{${line}}$\n`;
                 });
+
+                let split = diff.split('\n');
+                let newLines = [];
+                for (let i = 0; i < split.length; i++) {
+                    // if we have a colored(changed) line within 5, keep this line
+                    for (let j = -5; j < 5; j++) {
+                        if (split[i + j].toString().includes('\\color{')) {
+                            newLines.push(split[i]);
+                            break;
+                        }
+                    }
+                }
+                diff = newLines.join('\n');
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);
             }

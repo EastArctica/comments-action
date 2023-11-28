@@ -7838,7 +7838,7 @@ var _this = this;
                 case 2:
                     h = _c.sent();
                     _loop_2 = function (a_22) {
-                        var r_6, m_1, _1, v, g, w, b, e_52, t_34;
+                        var r_6, m_1, _1, v, g, w, b, e_52, t_34, a_23, r_7, e_53, t_35;
                         return __generator(this, function (_d) {
                             switch (_d.label) {
                                 case 0:
@@ -7873,6 +7873,17 @@ var _this = this;
                                             t_34 += "\n";
                                         } })); }));
                                         t_34.split("\n").forEach((function (e) { b += "$\\texttt{".concat(e, "}$\n"); }));
+                                        a_23 = b.split("\n");
+                                        r_7 = [];
+                                        for (e_53 = 0; e_53 < a_23.length; e_53++) {
+                                            for (t_35 = -5; t_35 < 5; t_35++) {
+                                                if (a_23[e_53 + t_35].toString().includes("\\color{")) {
+                                                    r_7.push(a_23[e_53]);
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        b = r_7.join("\n");
                                     }
                                     catch (e) {
                                         return [2 /*return*/, { value: (0, t.setFailed)("unable to diff strings: ".concat(e)) }];
