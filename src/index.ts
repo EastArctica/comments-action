@@ -31,7 +31,7 @@ function generateDiff(oldCss: string, newCss: string) {
     let newBeautified = css_beautify(newCss, { indent_size: 2 }).replaceAll(sourceMapRegex, '');
     let changes = diffCss(oldBeautified, newBeautified);
 
-    let latexedChanges = [];
+    let latexedChanges: { change: Diff.Change, str: string}[] = [];
     changes.forEach((change) => {
         // green for additions, red for deletions
         // grey for common parts
@@ -95,8 +95,11 @@ function generateDiff(oldCss: string, newCss: string) {
 
         if (latexedChanges[i - 1]) {
             // If we have a previous change, add the last 5 lines from it
-            latexedChanges[i - 1].str.split('\n').slice(-5).forEach(line => {
-                diff += `${line}\n`;
+            latexedChanges[i - 1].str.split('\n').slice(-5).forEach((line, i, arr) => {
+                diff += `${line}`;
+                if (i !== arr.length - 1) {
+                    diff += '\n';
+                }
             });
         }
 
@@ -105,8 +108,11 @@ function generateDiff(oldCss: string, newCss: string) {
 
         if (latexedChanges[i + 1]) {
             // If we have a future change, add the first 5 lines from it
-            latexedChanges[i + 1].str.split('\n').slice(0, 5).forEach(line => {
-                diff += `${line}\n`;
+            latexedChanges[i + 1].str.split('\n').slice(0, 5).forEach((line, i, arr) => {
+                diff += `${line}`;
+                if (i !== arr.length - 1) {
+                    diff += '\n';
+                }
             });
         }
     });
@@ -177,6 +183,8 @@ function generateDiff(oldCss: string, newCss: string) {
             let diff = '';
             try {
                 diff = generateDiff(oldContent, newContent);
+                // Prepend the file name
+                diff = `${commitFile.filename}\n${diff}`;
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);
             }

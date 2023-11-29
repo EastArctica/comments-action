@@ -7827,9 +7827,13 @@ var _this = this;
         } })); d.push(a); })); d.forEach((function (e, t) { var a = ""; e.str.split("\n").forEach((function (e) { a += "$\\texttt{".concat(e, "}$\n"); })); d[t].str = a; })); var o = ""; d.forEach((function (e, t) { if (!e.change.added && !e.change.removed) {
             return;
         } o += "\n@@ -some_line,".concat(e.change.value.length, " @@\n"); if (d[t - 1]) {
-            d[t - 1].str.split("\n").slice(-5).forEach((function (e) { o += "".concat(e, "\n"); }));
+            d[t - 1].str.split("\n").slice(-5).forEach((function (e, t, a) { o += "".concat(e); if (t !== a.length - 1) {
+                o += "\n";
+            } }));
         } o += e.str; if (d[t + 1]) {
-            d[t + 1].str.split("\n").slice(0, 5).forEach((function (e) { o += "".concat(e, "\n"); }));
+            d[t + 1].str.split("\n").slice(0, 5).forEach((function (e, t, a) { o += "".concat(e); if (t !== a.length - 1) {
+                o += "\n";
+            } }));
         } })); return o; }
         !(function () { return __awaiter(_this, void 0, void 0, function () { var e, p, i, r, n, _a, d, o, l, u, m, c, _loop_2, _i, _b, a_22, state_2, e_51; return __generator(this, function (_c) {
             switch (_c.label) {
@@ -7878,6 +7882,7 @@ var _this = this;
                                     g = "";
                                     try {
                                         g = generateDiff(h, v);
+                                        g = "".concat(a_22.filename, "\n").concat(g);
                                     }
                                     catch (e) {
                                         return [2 /*return*/, { value: (0, t.setFailed)("unable to diff strings: ".concat(e)) }];
