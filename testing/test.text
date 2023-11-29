@@ -1,0 +1,93 @@
+
+@@ -some_line,4 @@
+$\texttt{.authBox\\\_\\\_7196a \\{}$
+$\texttt{\hspace\{1em\}width: 480px;}$
+$\texttt{\hspace\{1em\}padding: var(--custom-auth-box-auth-box-padding);}$
+$\texttt{\hspace\{1em\}font-size: }$
+$\texttt{\color{red}18px}$
+$\texttt{\color{green}1.125rem}$
+
+@@ -some_line,8 @@
+$\texttt{\color{red}18px}$
+$\texttt{\color{green}1.125rem}$
+$\texttt{;}$
+$\texttt{\hspace\{1em\}box-shadow: var(--legacy-elevation-high);}$
+$\texttt{\hspace\{1em\}border-radius: 5px;}$
+$\texttt{\hspace\{1em\}box-sizing: border-box;}$
+$\texttt{\hspace\{1em\}color: var(--text-muted)}$
+@@ -some_line,4 @@
+$\texttt{\\}}$
+$\texttt{}$
+$\texttt{.pillMessage\\\_\\\_48334 \\{}$
+$\texttt{\hspace\{1em\}font-size: }$
+$\texttt{\color{red}14px}$
+$\texttt{\color{green}.875rem}$
+
+@@ -some_line,7 @@
+$\texttt{\color{red}14px}$
+$\texttt{\color{green}.875rem}$
+$\texttt{;}$
+$\texttt{\hspace\{1em\}white-space: nowrap;}$
+$\texttt{\hspace\{1em\}color: var(--header-secondary)}$
+$\texttt{\\}}$
+$\texttt{}$
+@@ -some_line,4 @@
+$\texttt{}$
+$\texttt{{@}media(min-height:640px) \\{}$
+$\texttt{\hspace\{1em\}.pillMessage\\\_\\\_48334 \\{}$
+$\texttt{\hspace\{2em\}font-size: }$
+$\texttt{\color{red}16px}$
+$\texttt{\color{green}1rem}$
+
+@@ -some_line,4 @@
+$\texttt{\color{red}16px}$
+$\texttt{\color{green}1rem}$
+$\texttt{}$
+$\texttt{\hspace\{1em\}\\}}$
+$\texttt{\\}}$
+$\texttt{}$
+$\texttt{.pillIcon\\\_\\\_5b2ea \\{}$
+@@ -some_line,4 @@
+$\texttt{\\}}$
+$\texttt{}$
+$\texttt{.button\\\_\\\_47891 \\{}$
+$\texttt{\hspace\{1em\}font-size: }$
+$\texttt{\color{red}16px}$
+$\texttt{\color{green}1rem}$
+
+@@ -some_line,4 @@
+$\texttt{\color{red}16px}$
+$\texttt{\color{green}1rem}$
+$\texttt{;}$
+$\texttt{\hspace\{1em\}line-height: }$
+
+@@ -some_line,4 @@
+$\texttt{;}$
+$\texttt{\hspace\{1em\}line-height: }$
+$\texttt{\color{red}24px}$
+$\texttt{\color{green}1.5rem}$
+
+@@ -some_line,6 @@
+$\texttt{\color{red}24px}$
+$\texttt{\color{green}1.5rem}$
+$\texttt{}$
+$\texttt{\\}}$
+$\texttt{}$
+$\texttt{.linkButton\\\_ba7970 \\{}$
+$\texttt{\hspace\{1em\}display: block;}$
+@@ -some_line,4 @@
+$\texttt{}$
+$\texttt{.description\\\_e01baa \\{}$
+$\texttt{\hspace\{1em\}margin-top: 8px;}$
+$\texttt{\hspace\{1em\}font-size: }$
+$\texttt{\color{red}12px}$
+$\texttt{\color{green}.75rem}$
+
+@@ -some_line,6 @@
+$\texttt{\color{red}12px}$
+$\texttt{\color{green}.75rem}$
+$\texttt{}$
+$\texttt{\\}}$
+$\texttt{}$
+$\texttt{.wrapper\\\_\\\_18aa1 \\{}$
+$\texttt{\hspace\{1em\}margin: 0}$

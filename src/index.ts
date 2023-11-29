@@ -1,11 +1,113 @@
-import { info, isDebug, setFailed } from '@actions/core';
-import { context, getOctokit } from '@actions/github';
-import type { PushEvent } from '@octokit/webhooks-types';
-import { diffCss } from 'diff';
-import { css_beautify } from 'js-beautify';
+import { toJSON, toCSS } from 'cssjson';
+import { readFileSync, writeFileSync } from 'fs';
+import { customToCSS } from './cssjson';
 
-const sourceMapRegex = /\/\*# sourceMappingURL=.*?\.map\*\//g;
-const token = process.env.GITHUB_TOKEN
+type Change = {
+    selector: string,
+    type: 'added' | 'removed' | 'changed',
+    oldNode?: cssNode,
+    newNode?: cssNode
+};
+const semiCss = /(?<![;}])}/g;
+
+const newCss = readFileSync('./css/new.app.css', 'utf8').replaceAll(semiCss, ';}');
+const oldCss = readFileSync('./css/old.app.css', 'utf8').replaceAll(semiCss, ';}');
+const newNode = toJSON(newCss);
+const oldNode = toJSON(oldCss);
+
+// Find everything in newJson that's not in oldJson
+function findChanges(oldNode: cssNode, newNode: cssNode): Change[] {
+    let changes: Change[] = [];
+
+    // If A doesn't have B's node, The node must've been added
+    for (let key in newNode.children) {
+        if (!oldNode.children.hasOwnProperty(key)) {
+            changes.push({
+                selector: key,
+                type: 'added',
+                newNode: newNode.children[key]
+            });
+        } else {
+            // This node exists in both A and B, but it might have changed
+            // Check if the node's children are different
+            let childrenDiff = findChanges(oldNode.children[key], newNode.children[key]);
+            if (childrenDiff.length > 0) {
+                changes.push({
+                    selector: key,
+                    type: 'changed',
+                    oldNode: oldNode.children[key],
+                    newNode: newNode.children[key]
+                });
+            }
+
+            // We also need to check if the node's attributes are different
+        
+            let attributesDiff = Object.keys(oldNode.children[key].attributes).filter((attr) => {
+                // attributes can be an array, so we need to check if they're the same
+                if (Array.isArray(oldNode.children[key].attributes[attr]) && 
+                    Array.isArray(newNode.children[key].attributes[attr])) {
+                    let oldAttr = oldNode.children[key].attributes[attr] as string[];
+                    let newAttr = newNode.children[key].attributes[attr] as string[];
+                    if (oldAttr.length !== newAttr.length) {
+                        return true;
+                    }
+
+                    for (const attr of oldAttr) {
+                        if (!oldAttr.includes(attr)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                return oldNode.children[key].attributes[attr] !== newNode.children[key].attributes[attr];
+            });
+            // Add the rest into the diff
+            attributesDiff = attributesDiff.concat(Object.keys(newNode.children[key].attributes).filter((attr) => {
+                // attributes can be an array, so we need to check if they're the same
+                if (Array.isArray(oldNode.children[key].attributes[attr]) && 
+                    Array.isArray(newNode.children[key].attributes[attr])) {
+                    let oldAttr = oldNode.children[key].attributes[attr] as string[];
+                    let newAttr = newNode.children[key].attributes[attr] as string[];
+                    if (oldAttr.length !== newAttr.length) {
+                        return true;
+                    }
+
+                    for (const attr of oldAttr) {
+                        if (!oldAttr.includes(attr)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                return oldNode.children[key].attributes[attr] !== newNode.children[key].attributes[attr];
+            }));
+
+            if (attributesDiff.length > 0) {
+                changes.push({
+                    selector: key,
+                    type: 'changed',
+                    oldNode: oldNode.children[key],
+                    newNode: newNode.children[key]
+                });
+            }
+        }
+    }
+
+    // If B doesn't have A's node, The node must've been removed
+    for (let key in oldNode.children) {
+        if (!newNode.children.hasOwnProperty(key)) {
+            changes.push({
+                selector: key,
+                type: 'removed',
+                oldNode: oldNode.children[key]
+            });
+        }
+    }
+
+    return changes;
+}
 
 function latexEscape(str: string) {
     // https://stackoverflow.com/a/1629466
@@ -25,182 +127,194 @@ function latexEscape(str: string) {
         .replaceAll('@', '{@}'); // This makes no sense but you need it
 }
 
-function generateDiff(oldCss: string, newCss: string) {
-    // Beautify & skip source mapping
-    let oldBeautified = css_beautify(oldCss, { indent_size: 2 }).replaceAll(sourceMapRegex, '');
-    let newBeautified = css_beautify(newCss, { indent_size: 2 }).replaceAll(sourceMapRegex, '');
-    let changes = diffCss(oldBeautified, newBeautified);
+let changes = findChanges(oldNode, newNode);
+writeFileSync('./changes.json', JSON.stringify(changes, null, 4), 'utf8');
+let diffStr = '';
+for (const change of changes) {
+    switch (change.type) {
+    case 'added': {
+        if (!change.newNode) {
+            break;
+        }
 
-    let latexedChanges: { change: Diff.Change, str: string}[] = [];
-    changes.forEach((change) => {
-        // green for additions, red for deletions
-        // grey for common parts
-        const color = change.added ? 'green' : change.removed ? 'red' : false;
+        let fakeNode: cssNode = {
+            attributes: {},
+            children: {
+                [change.selector]: change.newNode
+            },
+        }
+        let css = toCSS(fakeNode).trim();
+        css.split('\n').forEach(line => {
+            // TODO: This only highlights the attribute's value, but not it's name.
+            diffStr += `$\\texttt{\\color{green}${latexEscape(line)}}$\n`;
+        });
+        break;
+    }
+    case 'removed': {
+        if (!change.oldNode) {
+            break;
+        }
 
-        let latexedChange = {
-            change,
-            str: ''
-        };
+        let fakeNode = {
+            attributes: {},
+            children: {
+                [change.selector]: change.oldNode
+            },
+        }
+        let css = toCSS(fakeNode).trim();
+        css.split('\n').forEach(line => {
+            // TODO: This only highlights the attribute's value, but not it's name.
+            diffStr += `$\\texttt{\\color{red}${latexEscape(line)}}$\n`;
+        });
+        break;
+    }
+    case 'changed': {
+        if (!change.oldNode || !change.newNode) {
+            break;
+        }
 
-        change.value.split('\n').forEach((val, i, arr) => {
-            // Github/markdown by default won't render spaces at the beginning of lines. This fixes that.
-            let totalSpaces = 0;
-            while (val.slice(0, 1) == ' ') {
-                totalSpaces++;
-                val = val.slice(1);
+        // Determine which attributes were added/changed/removed
+        let attributesDiff = Object.keys(change.oldNode.attributes).filter(attr => {
+            if (!change.oldNode || !change.newNode) {
+                return false;
             }
 
-            // Minor optimization to prevent an hspace with 0em size
-            if (totalSpaces > 0) {
-                latexedChange.str += `\\hspace\\{${(totalSpaces / 2)}em\\}`;
+            // If we have multiple of this attribute, we need to verify that they're all the same
+            if (Array.isArray(change.oldNode.attributes[attr]) && 
+                Array.isArray(change.newNode.attributes[attr])) {
+                let oldAttr = change.oldNode.attributes[attr] as string[];
+                let newAttr = change.newNode.attributes[attr] as string[];
+                if (oldAttr.length !== newAttr.length) {
+                    return true;
+                }
+
+                for (const attr of oldAttr) {
+                    if (!oldAttr.includes(attr)) {
+                        return true;
+                    }
+                }
+                return false;
             }
 
-            // Minor optimization, only add color if we need
-            if (color) {
-                latexedChange.str += `\\color{${color}}`
-            }
-
-            latexedChange.str += latexEscape(val);
-
-            // The last item doesn't need a new line
-            if (i !== arr.length - 1) {
-                latexedChange.str += '\n';
-            }
+            return change.oldNode.attributes[attr] !== change.newNode.attributes[attr];
         });
 
-        latexedChanges.push(latexedChange);
-    });
+        // Add the rest into the diff
+        attributesDiff = attributesDiff.concat(Object.keys(change.newNode.attributes).filter((attr) => {
+            if (!change.oldNode || !change.newNode) {
+                return false;
+            }
 
+            // If we have multiple of this attribute, we need to verify that they're all the same
+            if (Array.isArray(change.oldNode.attributes[attr]) && 
+                Array.isArray(change.newNode.attributes[attr])) {
+                let oldAttr = change.oldNode.attributes[attr] as string[];
+                let newAttr = change.newNode.attributes[attr] as string[];
+                if (oldAttr.length !== newAttr.length) {
+                    return true;
+                }
 
-    // Finalize the latex
-    latexedChanges.forEach((change, i) => {
-        let newStr = '';
-        change.str.split('\n').forEach(line => {
-            // Every line needs to be wrapped in latex to maintain monospace font throughout the comment.
-            newStr += `$\\texttt{${line}}$\n`;
+                for (const attr of oldAttr) {
+                    if (!oldAttr.includes(attr)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            return change.oldNode.attributes[attr] !== change.newNode.attributes[attr];
+        }));
+
+        let attributesAdded = attributesDiff.filter((attr) => {
+            // new node has it, but old does not
+            return  change.oldNode &&
+                    change.newNode &&
+                    !change.oldNode.attributes.hasOwnProperty(attr) &&
+                    change.newNode.attributes.hasOwnProperty(attr);
         });
-        latexedChanges[i].str = newStr;
-    });
+        let attributesRemoved = attributesDiff.filter((attr) => {
+            // old node has it, but new does not
+            return  change.oldNode &&
+                    change.newNode &&
+                    change.oldNode.attributes.hasOwnProperty(attr) &&
+                    !change.newNode.attributes.hasOwnProperty(attr);
+        });
+        let attributesChanged = attributesDiff.filter((attr) => {
+            // Both nodes have it, but they differ
+            return  change.oldNode &&
+                    change.newNode &&
+                    change.oldNode.attributes.hasOwnProperty(attr) &&
+                    change.newNode.attributes.hasOwnProperty(attr) &&
+                    change.oldNode.attributes[attr] !== change.newNode.attributes[attr];
+        });
 
-    let diff = '';
-    // Only keep 5 lines around modifications
-    latexedChanges.forEach((change, i) => {
-        // If nothing happened in this change, skip it
-        if (!change.change.added && !change.change.removed) {
-            return;
+        // Add css block and attributes to diffStr
+        let fakeNode = {
+            attributes: {},
+            children: {
+                [change.selector]: change.newNode
+            },
         }
 
-        // Add header
-        diff += `\n@@ -some_line,${change.change.value.length} @@\n`;
-
-        if (latexedChanges[i - 1]) {
-            // If we have a previous change, add the last 5 lines from it
-            latexedChanges[i - 1].str.split('\n').slice(-5).forEach((line, i, arr) => {
-                diff += `${line}`;
-                if (i !== arr.length - 1) {
-                    diff += '\n';
+        for (const attr of attributesAdded) {
+            if (Array.isArray(change.newNode.attributes)) {
+                let str = '';
+                for (const val of change.newNode.attributes[attr] as string[]) {
+                    str += `LATEX-COLOR-GREEN${val}LATEX-COLOR-WHITE, `;
                 }
-            });
+                fakeNode.children[change.selector].attributes[attr] = str.slice(0, -2);
+            } else {
+                let str = `LATEX-COLOR-GREEN${change.newNode.attributes[attr]}LATEX-COLOR-WHITE`;
+                fakeNode.children[change.selector].attributes[attr] = str;
+            }
         }
-
-        // Add the changes themselves
-        diff += change.str;
-
-        if (latexedChanges[i + 1]) {
-            // If we have a future change, add the first 5 lines from it
-            latexedChanges[i + 1].str.split('\n').slice(0, 5).forEach((line, i, arr) => {
-                diff += `${line}`;
-                if (i !== arr.length - 1) {
-                    diff += '\n';
+        for (const attr of attributesRemoved) {
+            if (Array.isArray(change.oldNode.attributes)) {
+                let str = '';
+                for (const val of change.oldNode.attributes[attr] as string[]) {
+                    str += `LATEX-COLOR-RED${val}LATEX-COLOR-WHITE, `;
                 }
-            });
+                fakeNode.children[change.selector].attributes[attr] = str.slice(0, -2);
+            } else {
+                let str = `LATEX-COLOR-RED${change.oldNode.attributes[attr]}LATEX-COLOR-WHITE`;
+                fakeNode.children[change.selector].attributes[attr] = str;
+            }
         }
-    });
+        for (const attr of attributesChanged) {
+            let str = '';
+            // Find new
+            if (Array.isArray(change.newNode.attributes)) {
+                for (let i in change.newNode.attributes[attr] as string[]) {
+                    (change.newNode.attributes[attr] as string[])[i] += `LATEX-COLOR-GREEN${change.newNode.attributes[attr][i]}LATEX-COLOR-WHITE`;
+                }
+            } else {
+                str = `LATEX-COLOR-GREEN${change.newNode.attributes[attr]}LATEX-COLOR-WHITE`;
+                fakeNode.children[change.selector].attributes[attr] = str;
+            }
 
+            // Find old
+            if (Array.isArray(change.oldNode.attributes)) {
+                for (let i in change.newNode.attributes[attr] as string[]) {
+                    (change.newNode.attributes[attr] as string[])[i] += `LATEX-COLOR-GREEN${change.newNode.attributes[attr][i]}LATEX-COLOR-WHITE`;
+                }
+            } else {
+                str += `LATEX-COLOR-RED${change.oldNode.attributes[attr]}LATEX-COLOR-WHITE`;
+                fakeNode.children[change.selector].attributes[attr] = str;
+            }
 
-    return diff;
+        }
+
+        let css = customToCSS(fakeNode).trim();
+        css = latexEscape(css);
+        css = css.replaceAll('LATEX-COLOR-GREEN', '\\color{green}');
+        css = css.replaceAll('LATEX-COLOR-RED', '\\color{red}');
+        css = css.replaceAll('LATEX-COLOR-WHITE', '\\color{white}');
+        css.split('\n').forEach(line => {
+            diffStr += `$\\texttt{${line}}$\n`;
+        });
+        break;
+    }
+    }
 }
 
-!(async () => {
-    try {
-        if (!token) {
-            return setFailed('Invalid GITHUB_TOKEN');
-        }
-
-        const octokit = getOctokit(token);
-        const { owner, repo } = context.repo;
-
-        if (context.eventName !== 'push') {
-            return;
-        }
-
-        const payload = context.payload as PushEvent;
-        const commitSha = payload.after;
-
-        const commit = await octokit.rest.repos.getCommit({
-            owner,
-            repo,
-            ref: commitSha
-        });
-
-        if (!commit) {
-            return setFailed('Failed to find commit.');
-        }
-
-        const oldTree = await octokit.rest.git.getTree({
-            owner,
-            repo,
-            tree_sha: payload.before,
-        });
-
-        for (const commitFile of commit.data.files) {
-            if (commitFile.status !== 'modified' || (commitFile.filename !== 'shared.current.css' && commitFile.filename !== 'app.current.css')) {
-                continue;
-            }
-
-            let newFileSha = commitFile.sha;
-            const oldFileSha = oldTree?.data?.tree?.find?.(file => file.path === commitFile.filename)?.sha;
-            if (!oldFileSha) {
-                return info('Failed to find old file.');
-            }
-
-            const oldFile = await octokit.rest.git.getBlob({
-                owner,
-                repo,
-                file_sha: oldFileSha
-            });
-            const newFile = await octokit.rest.git.getBlob({
-                owner,
-                repo,
-                file_sha: newFileSha,
-            });
-
-
-
-            const oldContent = Buffer.from(oldFile.data.content, 'base64').toString('utf8');
-            const newContent = Buffer.from(newFile.data.content, 'base64').toString('utf8');
-
-            let diff = '';
-            try {
-                diff = generateDiff(oldContent, newContent);
-                // Prepend the file name
-                diff = `${commitFile.filename}\n${diff}`;
-            } catch (e) {
-                return setFailed(`unable to diff strings: ${e}`);
-            }
-
-            if (!diff) {
-                return info('no strings changed');
-            }
-
-            await octokit.rest.repos.createCommitComment({
-                owner,
-                repo,
-                commit_sha: commitSha,
-                body: diff
-            });
-        }
-    } catch (error) {
-        setFailed(isDebug() ? error.stack : error.message);
-    }
-})();
+writeFileSync('./diff.txt', diffStr, 'utf8');

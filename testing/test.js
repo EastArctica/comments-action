@@ -3,9 +3,6 @@ const { diffCss } = require('diff');
 const { css_beautify } = require('js-beautify');
 const sourceMapRegex = /\/\*# sourceMappingURL=.*?\.map\*\//g;
 
-let old_file = fs.readFileSync('old.app.css', 'utf-8');
-let new_file = fs.readFileSync('new.app.css', 'utf-8');
-
 // Custom diff
 function generateDiff(oldCss, newCss) {
     // Beautify & skip source mapping
@@ -53,7 +50,6 @@ function generateDiff(oldCss, newCss) {
         latexedChanges.push(latexedChange);
     });
 
-
     // Finalize the latex
     latexedChanges.forEach((change, i) => {
         let newStr = '';
@@ -77,27 +73,34 @@ function generateDiff(oldCss, newCss) {
 
         if (latexedChanges[i - 1]) {
             // If we have a previous change, add the last 5 lines from it
-            latexedChanges[i - 1].str.split('\n').slice(-5).forEach(line => {
-                diff += `${line}\n`;
+            latexedChanges[i - 1].str.split('\n').slice(-5).forEach((line, i, arr) => {
+                diff += `${line}`;
+                if (i !== arr.length - 1) {
+                    diff += '\n';
+                }
             });
         }
-    
+
         // Add the changes themselves
         diff += change.str;
 
         if (latexedChanges[i + 1]) {
             // If we have a future change, add the first 5 lines from it
-            latexedChanges[i + 1].str.split('\n').slice(0, 5).forEach(line => {
-                diff += `${line}\n`;
+            latexedChanges[i + 1].str.split('\n').slice(0, 5).forEach((line, i, arr) => {
+                diff += `${line}`;
+                if (i !== arr.length - 1) {
+                    diff += '\n';
+                }
             });
         }
     });
-    
-    fs.writeFileSync('test.tex', diff);
 
+    fs.writeFileSync('test.tex', diff, 'utf-8');
     return diff;
 }
 
+let old_file = fs.readFileSync('old.app.css', 'utf-8');
+let new_file = fs.readFileSync('new.app.css', 'utf-8');
 let diff = generateDiff(old_file, new_file);
 //console.log(diff);
 
