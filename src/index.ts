@@ -4,9 +4,10 @@ import type { PushEvent } from '@octokit/webhooks-types';
 import { diffCss } from 'diff';
 import { css_beautify } from 'js-beautify';
 
+const sourceMapRegex = /\/\*# sourceMappingURL=.*?\.map\*\//g;
 const token = process.env.GITHUB_TOKEN
 
-function latexEscape(str) {
+function latexEscape(str: string) {
     // https://stackoverflow.com/a/1629466
     return str
         .replaceAll('\\', '\\\\\\')
@@ -20,7 +21,98 @@ function latexEscape(str) {
         .replaceAll('%', '\\\\%')
         .replaceAll('~', '\\\\~')
         .replaceAll('*', '\\*')
-        .replaceAll('`', '\\`');
+        .replaceAll('`', '\\`')
+        .replaceAll('@', '{@}'); // This makes no sense but you need it
+}
+
+function generateDiff(oldCss: string, newCss: string) {
+    // Beautify & skip source mapping
+    let oldBeautified = css_beautify(oldCss, { indent_size: 2 }).replaceAll(sourceMapRegex, '');
+    let newBeautified = css_beautify(newCss, { indent_size: 2 }).replaceAll(sourceMapRegex, '');
+    let changes = diffCss(oldBeautified, newBeautified);
+
+    let latexedChanges = [];
+    changes.forEach((change) => {
+        // green for additions, red for deletions
+        // grey for common parts
+        const color = change.added ? 'green' : change.removed ? 'red' : false;
+
+        let latexedChange = {
+            change,
+            str: ''
+        };
+
+        change.value.split('\n').forEach((val, i, arr) => {
+            // Github/markdown by default won't render spaces at the beginning of lines. This fixes that.
+            let totalSpaces = 0;
+            while (val.slice(0, 1) == ' ') {
+                totalSpaces++;
+                val = val.slice(1);
+            }
+
+            // Minor optimization to prevent an hspace with 0em size
+            if (totalSpaces > 0) {
+                latexedChange.str += `\\hspace\\{${(totalSpaces / 2)}em\\}`;
+            }
+
+            // Minor optimization, only add color if we need
+            if (color) {
+                latexedChange.str += `\\color{${color}}`
+            }
+
+            latexedChange.str += latexEscape(val);
+
+            // The last item doesn't need a new line
+            if (i !== arr.length - 1) {
+                latexedChange.str += '\n';
+            }
+        });
+
+        latexedChanges.push(latexedChange);
+    });
+
+
+    // Finalize the latex
+    latexedChanges.forEach((change, i) => {
+        let newStr = '';
+        change.str.split('\n').forEach(line => {
+            // Every line needs to be wrapped in latex to maintain monospace font throughout the comment.
+            newStr += `$\\texttt{${line}}$\n`;
+        });
+        latexedChanges[i].str = newStr;
+    });
+
+    let diff = '';
+    // Only keep 5 lines around modifications
+    latexedChanges.forEach((change, i) => {
+        // If nothing happened in this change, skip it
+        if (!change.change.added && !change.change.removed) {
+            return;
+        }
+
+        // Add header
+        diff += `\n@@ -some_line,${change.change.value.length} @@\n`;
+
+        if (latexedChanges[i - 1]) {
+            // If we have a previous change, add the last 5 lines from it
+            latexedChanges[i - 1].str.split('\n').slice(-5).forEach(line => {
+                diff += `${line}\n`;
+            });
+        }
+
+        // Add the changes themselves
+        diff += change.str;
+
+        if (latexedChanges[i + 1]) {
+            // If we have a future change, add the first 5 lines from it
+            latexedChanges[i + 1].str.split('\n').slice(0, 5).forEach(line => {
+                diff += `${line}\n`;
+            });
+        }
+    });
+
+
+    return diff;
 }
 
 !(async () => {
@@ -59,7 +151,7 @@ function latexEscape(str) {
             if (commitFile.status !== 'modified' || (commitFile.filename !== 'shared.current.css' && commitFile.filename !== 'app.current.css')) {
                 continue;
             }
-            
+
             let newFileSha = commitFile.sha;
             const oldFileSha = oldTree?.data?.tree?.find?.(file => file.path === commitFile.filename)?.sha;
             if (!oldFileSha) {
@@ -84,57 +176,7 @@ function latexEscape(str) {
 
             let diff = '';
             try {
-                let rawDiff = diffCss(css_beautify(oldContent, { indent_size: 2 }),
-                    css_beautify(newContent, { indent_size: 2 }));
-                let semiFinalStr = '';
-                
-                rawDiff.forEach((part) => {
-                    // green for additions, red for deletions
-                    // grey for common parts
-                    const color = part.added ? 'green' :
-                        part.removed ? 'red' : false;
-                
-                    // Every line needs to be wrapped in `$\texttt{`
-                    part.value.split('\n').forEach((val, i, arr) => {
-                        // Every space at the beginning
-                        let totalSpaces = 0;
-                        while (val.slice(0, 1) == ' ') {
-                            totalSpaces++;
-                            val = val.slice(1);
-                        }
-                        if (totalSpaces > 0) {
-                            semiFinalStr += `\\hspace\\{${(totalSpaces / 2)}em\\}`;
-                        }
-                
-                        if (color) {
-                            semiFinalStr += `\\color{${color}}`
-                        }
-                
-                        semiFinalStr += latexEscape(val);
-                
-                        // The last item doesn't need a new line
-                        if (i !== arr.length - 1) {
-                            semiFinalStr += '\n';
-                        }
-                    })
-                });
-                
-                semiFinalStr.split('\n').forEach(line => {
-                    diff += `$\\texttt{${line}}$\n`;
-                });
-
-                let split = diff.split('\n');
-                let newLines = [];
-                for (let i = 0; i < split.length; i++) {
-                    // if we have a colored(changed) line within 5, keep this line
-                    for (let j = -5; j < 5; j++) {
-                        if ((`${split[i + j]}`).toString().includes('\\color{')) {
-                            newLines.push(split[i]);
-                            break;
-                        }
-                    }
-                }
-                diff = newLines.join('\n');
+                diff = generateDiff(oldContent, newContent);
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);
             }

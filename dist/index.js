@@ -7812,93 +7812,87 @@ var _this = this;
         var a = __nccwpck_require__(4128);
         var p = __nccwpck_require__(1211);
         var i = __nccwpck_require__(6792);
-        var r = process.env.GITHUB_TOKEN;
-        function latexEscape(e) { return e.replaceAll("\\", "\\\\\\").replaceAll("{", "\\\\{").replaceAll("}", "\\\\}").replaceAll("_", "\\\\\\_").replaceAll("^", "\\\\^").replaceAll("#", "\\\\#").replaceAll("&", "\\\\&").replaceAll("$", "\\\\$").replaceAll("%", "\\\\%").replaceAll("~", "\\\\~").replaceAll("*", "\\*").replaceAll("`", "\\`"); }
-        !(function () { return __awaiter(_this, void 0, void 0, function () { var e, s, n, d, o, _a, l, u, m, c, _, h, _loop_2, _i, _b, a_22, state_2, e_51; return __generator(this, function (_c) {
+        var r = /\/\*# sourceMappingURL=.*?\.map\*\//g;
+        var s = process.env.GITHUB_TOKEN;
+        function latexEscape(e) { return e.replaceAll("\\", "\\\\\\").replaceAll("{", "\\\\{").replaceAll("}", "\\\\}").replaceAll("_", "\\\\\\_").replaceAll("^", "\\\\^").replaceAll("#", "\\\\#").replaceAll("&", "\\\\&").replaceAll("$", "\\\\$").replaceAll("%", "\\\\%").replaceAll("~", "\\\\~").replaceAll("*", "\\*").replaceAll("`", "\\`").replaceAll("@", "{@}"); }
+        function generateDiff(e, t) { var a = (0, i.css_beautify)(e, { indent_size: 2 }).replaceAll(r, ""); var s = (0, i.css_beautify)(t, { indent_size: 2 }).replaceAll(r, ""); var n = (0, p.diffCss)(a, s); var d = []; n.forEach((function (e) { var t = e.added ? "green" : e.removed ? "red" : false; var a = { change: e, str: "" }; e.value.split("\n").forEach((function (e, p, i) { var r = 0; while (e.slice(0, 1) == " ") {
+            r++;
+            e = e.slice(1);
+        } if (r > 0) {
+            a.str += "\\hspace\\{".concat(r / 2, "em\\}");
+        } if (t) {
+            a.str += "\\color{".concat(t, "}");
+        } a.str += latexEscape(e); if (p !== i.length - 1) {
+            a.str += "\n";
+        } })); d.push(a); })); d.forEach((function (e, t) { var a = ""; e.str.split("\n").forEach((function (e) { a += "$\\texttt{".concat(e, "}$\n"); })); d[t].str = a; })); var o = ""; d.forEach((function (e, t) { if (!e.change.added && !e.change.removed) {
+            return;
+        } o += "\n@@ -some_line,".concat(e.change.value.length, " @@\n"); if (d[t - 1]) {
+            d[t - 1].str.split("\n").slice(-5).forEach((function (e) { o += "".concat(e, "\n"); }));
+        } o += e.str; if (d[t + 1]) {
+            d[t + 1].str.split("\n").slice(0, 5).forEach((function (e) { o += "".concat(e, "\n"); }));
+        } })); return o; }
+        !(function () { return __awaiter(_this, void 0, void 0, function () { var e, p, i, r, n, _a, d, o, l, u, m, c, _loop_2, _i, _b, a_22, state_2, e_51; return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
                     _c.trys.push([0, 7, , 8]);
-                    if (!r) {
+                    if (!s) {
                         return [2 /*return*/, (0, t.setFailed)("Invalid GITHUB_TOKEN")];
                     }
-                    o = (0, a.getOctokit)(r);
-                    _a = a.context.repo, l = _a.owner, u = _a.repo;
+                    n = (0, a.getOctokit)(s);
+                    _a = a.context.repo, d = _a.owner, o = _a.repo;
                     if (a.context.eventName !== "push") {
                         return [2 /*return*/];
                     }
-                    m = a.context.payload;
-                    c = m.after;
-                    return [4 /*yield*/, o.rest.repos.getCommit({ owner: l, repo: u, ref: c })];
+                    l = a.context.payload;
+                    u = l.after;
+                    return [4 /*yield*/, n.rest.repos.getCommit({ owner: d, repo: o, ref: u })];
                 case 1:
-                    _ = _c.sent();
-                    if (!_) {
+                    m = _c.sent();
+                    if (!m) {
                         return [2 /*return*/, (0, t.setFailed)("Failed to find commit.")];
                     }
-                    return [4 /*yield*/, o.rest.git.getTree({ owner: l, repo: u, tree_sha: m.before })];
+                    return [4 /*yield*/, n.rest.git.getTree({ owner: d, repo: o, tree_sha: l.before })];
                 case 2:
-                    h = _c.sent();
+                    c = _c.sent();
                     _loop_2 = function (a_22) {
-                        var r_6, m_1, _1, v, g, w, b, e_52, t_34, a_23, r_7, e_53, t_35;
+                        var s_6, l_1, m_1, _, h, v, g;
                         return __generator(this, function (_d) {
                             switch (_d.label) {
                                 case 0:
                                     if (a_22.status !== "modified" || a_22.filename !== "shared.current.css" && a_22.filename !== "app.current.css") {
                                         return [2 /*return*/, "continue"];
                                     }
-                                    r_6 = a_22.sha;
-                                    m_1 = (d = (n = (s = (e = h === null || h === void 0 ? void 0 : h.data) === null || e === void 0 ? void 0 : e.tree) === null || s === void 0 ? void 0 : s.find) === null || n === void 0 ? void 0 : n.call(s, (function (e) { return e.path === a_22.filename; }))) === null || d === void 0 ? void 0 : d.sha;
-                                    if (!m_1) {
+                                    s_6 = a_22.sha;
+                                    l_1 = (r = (i = (p = (e = c === null || c === void 0 ? void 0 : c.data) === null || e === void 0 ? void 0 : e.tree) === null || p === void 0 ? void 0 : p.find) === null || i === void 0 ? void 0 : i.call(p, (function (e) { return e.path === a_22.filename; }))) === null || r === void 0 ? void 0 : r.sha;
+                                    if (!l_1) {
                                         return [2 /*return*/, { value: (0, t.info)("Failed to find old file.") }];
                                     }
-                                    return [4 /*yield*/, o.rest.git.getBlob({ owner: l, repo: u, file_sha: m_1 })];
+                                    return [4 /*yield*/, n.rest.git.getBlob({ owner: d, repo: o, file_sha: l_1 })];
                                 case 1:
-                                    _1 = _d.sent();
-                                    return [4 /*yield*/, o.rest.git.getBlob({ owner: l, repo: u, file_sha: r_6 })];
+                                    m_1 = _d.sent();
+                                    return [4 /*yield*/, n.rest.git.getBlob({ owner: d, repo: o, file_sha: s_6 })];
                                 case 2:
-                                    v = _d.sent();
-                                    g = Buffer.from(_1.data.content, "base64").toString("utf8");
-                                    w = Buffer.from(v.data.content, "base64").toString("utf8");
-                                    b = "";
+                                    _ = _d.sent();
+                                    h = Buffer.from(m_1.data.content, "base64").toString("utf8");
+                                    v = Buffer.from(_.data.content, "base64").toString("utf8");
+                                    g = "";
                                     try {
-                                        e_52 = (0, p.diffCss)((0, i.css_beautify)(g, { indent_size: 2 }), (0, i.css_beautify)(w, { indent_size: 2 }));
-                                        t_34 = "";
-                                        e_52.forEach((function (e) { var a = e.added ? "green" : e.removed ? "red" : false; e.value.split("\n").forEach((function (e, p, i) { var r = 0; while (e.slice(0, 1) == " ") {
-                                            r++;
-                                            e = e.slice(1);
-                                        } if (r > 0) {
-                                            t_34 += "\\hspace\\{".concat(r / 2, "em\\}");
-                                        } if (a) {
-                                            t_34 += "\\color{".concat(a, "}");
-                                        } t_34 += latexEscape(e); if (p !== i.length - 1) {
-                                            t_34 += "\n";
-                                        } })); }));
-                                        t_34.split("\n").forEach((function (e) { b += "$\\texttt{".concat(e, "}$\n"); }));
-                                        a_23 = b.split("\n");
-                                        r_7 = [];
-                                        for (e_53 = 0; e_53 < a_23.length; e_53++) {
-                                            for (t_35 = -5; t_35 < 5; t_35++) {
-                                                if ("".concat(a_23[e_53 + t_35]).toString().includes("\\color{")) {
-                                                    r_7.push(a_23[e_53]);
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                        b = r_7.join("\n");
+                                        g = generateDiff(h, v);
                                     }
                                     catch (e) {
                                         return [2 /*return*/, { value: (0, t.setFailed)("unable to diff strings: ".concat(e)) }];
                                     }
-                                    if (!b) {
+                                    if (!g) {
                                         return [2 /*return*/, { value: (0, t.info)("no strings changed") }];
                                     }
-                                    return [4 /*yield*/, o.rest.repos.createCommitComment({ owner: l, repo: u, commit_sha: c, body: b })];
+                                    return [4 /*yield*/, n.rest.repos.createCommitComment({ owner: d, repo: o, commit_sha: u, body: g })];
                                 case 3:
                                     _d.sent();
                                     return [2 /*return*/];
                             }
                         });
                     };
-                    _i = 0, _b = _.data.files;
+                    _i = 0, _b = m.data.files;
                     _c.label = 3;
                 case 3:
                     if (!(_i < _b.length)) return [3 /*break*/, 6];
