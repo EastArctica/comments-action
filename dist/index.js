@@ -4439,7 +4439,6 @@ var _this = this;
                     var d_22 = p_36.filter((function (p) { return e_53.oldNode && e_53.newNode && e_53.oldNode.attributes.hasOwnProperty(p) && !e_53.newNode.attributes.hasOwnProperty(p); }));
                     var r_11 = p_36.filter((function (p) { return e_53.oldNode && e_53.newNode && e_53.oldNode.attributes.hasOwnProperty(p) && e_53.newNode.attributes.hasOwnProperty(p) && e_53.oldNode.attributes[p] !== e_53.newNode.attributes[p]; }));
                     var s_6 = { attributes: {}, children: (_c = {}, _c[e_53.selector] = e_53.newNode, _c) };
-                    console.log(a_30, d_22, r_11);
                     for (var _d = 0, a_23 = a_30; _d < a_23.length; _d++) {
                         var p_37 = a_23[_d];
                         if (Array.isArray(e_53.newNode.attributes)) {
