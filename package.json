@@ -21,6 +21,7 @@
     "@actions/github": "^5.1.0",
     "@adryd325/discord-datamining-lang-differ": "github:adryd325/discord-datamining-lang-differ#ec426f9422b7b85a9dac45a8bfd7a6926c0b9474",
     "@types/js-beautify": "^1.14.3",
+    "cssjson": "^2.1.3",
     "diff": "^5.1.0",
     "js-beautify": "^1.14.11"
   },

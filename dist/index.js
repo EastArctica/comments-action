@@ -1808,7 +1808,113 @@ var _this = this;
             return;
         } var d = e.registry[p].map((function (e) { return e.orig; })).indexOf(a); if (d === -1) {
             return;
-        } e.registry[p].splice(d, 1); } }, 8455: function (e, p) {
+        } e.registry[p].splice(d, 1); } }, 7555: function (e) { (function (p, a) { if (typeof define === "function" && define.amd) {
+            define([], a);
+        }
+        else if (true) {
+            e.exports = a();
+        }
+        else { } })(this, (function () { var e = new function () { var e = this; e.init = function () { String.prototype.trim = function () { return this.replace(/^\s+|\s+$/g, ""); }; String.prototype.repeat = function (e) { return new Array(1 + e).join(this); }; }; e.init(); var p = /([^\s\;\{\}][^\;\{\}]*)\{/g; var a = /\}/g; var d = /([^\;\{\}]*)\;/g; var t = /\/\*[\s\S]*?\*\//g; var r = /([^\:]+):([^\;]*);/; var s = /(\/\*[\s\S]*?\*\/)|([^\s\;\{\}][^\;\{\}]*(?=\{))|(\})|([^\;\{\}]+\;(?!\s*\*\/))/gim; var o = 1; var n = 2; var l = 3; var m = 4; var isEmpty = function (e) { return typeof e == "undefined" || e.length == 0 || e == null; }; e.toJSON = function (p, a) { var d = { children: {}, attributes: {} }; var u = null; var c = 0; if (typeof a == "undefined") {
+            var a = { ordered: false, comments: false, stripComments: false, split: false };
+        } if (a.stripComments) {
+            a.comments = false;
+            p = p.replace(t, "");
+        } while ((u = s.exec(p)) != null) {
+            if (!isEmpty(u[o]) && a.comments) {
+                var v = u[o].trim();
+                d[c++] = v;
+            }
+            else if (!isEmpty(u[n])) {
+                var h = u[n].trim();
+                var g = e.toJSON(p, a);
+                if (a.ordered) {
+                    var w = {};
+                    w["name"] = h;
+                    w["value"] = g;
+                    w["type"] = "rule";
+                    d[c++] = w;
+                }
+                else {
+                    if (a.split) {
+                        var _ = h.split(",");
+                    }
+                    else {
+                        var _ = [h];
+                    }
+                    for (i in _) {
+                        var T = _[i].trim();
+                        if (T in d.children) {
+                            for (var b in g.attributes) {
+                                d.children[T].attributes[b] = g.attributes[b];
+                            }
+                        }
+                        else {
+                            d.children[T] = g;
+                        }
+                    }
+                }
+            }
+            else if (!isEmpty(u[l])) {
+                return d;
+            }
+            else if (!isEmpty(u[m])) {
+                var E = u[m].trim();
+                var y = r.exec(E);
+                if (y) {
+                    var h = y[1].trim();
+                    var S = y[2].trim();
+                    if (a.ordered) {
+                        var w = {};
+                        w["name"] = h;
+                        w["value"] = S;
+                        w["type"] = "attr";
+                        d[c++] = w;
+                    }
+                    else {
+                        if (h in d.attributes) {
+                            var D = d.attributes[h];
+                            if (!(D instanceof Array)) {
+                                d.attributes[h] = [D];
+                            }
+                            d.attributes[h].push(S);
+                        }
+                        else {
+                            d.attributes[h] = S;
+                        }
+                    }
+                }
+                else {
+                    d[c++] = E;
+                }
+            }
+        } return d; }; e.toCSS = function (e, p, a) { var d = ""; if (typeof p == "undefined") {
+            p = 0;
+        } if (typeof a == "undefined") {
+            a = false;
+        } if (e.attributes) {
+            for (i in e.attributes) {
+                var t = e.attributes[i];
+                if (t instanceof Array) {
+                    for (var r = 0; r < t.length; r++) {
+                        d += strAttr(i, t[r], p);
+                    }
+                }
+                else {
+                    d += strAttr(i, t, p);
+                }
+            }
+        } if (e.children) {
+            var s = true;
+            for (i in e.children) {
+                if (a && !s) {
+                    d += "\n";
+                }
+                else {
+                    s = false;
+                }
+                d += strNode(i, e.children[i], p);
+            }
+        } return d; }; var strAttr = function (e, p, a) { return "\t".repeat(a) + e + ": " + p + ";\n"; }; var strNode = function (p, a, d) { var t = "\t".repeat(d) + p + " {\n"; t += e.toCSS(a, d + 1); t += "\t".repeat(d) + "}\n"; return t; }; }; return e; })); }, 8455: function (e, p) {
             "use strict";
             Object.defineProperty(p, "__esModule", { value: true });
             var Deprecation = /** @class */ (function (_super) {
@@ -4149,7 +4255,7 @@ var _this = this;
                 }
             } return t; }
             p.customToCSS = customToCSS;
-        }, 5223: function (module) { module.exports = eval("require")("cssjson"); }, 2628: function (module) { module.exports = eval("require")("encoding"); }, 9491: function (e) {
+        }, 2628: function (module) { module.exports = eval("require")("encoding"); }, 9491: function (e) {
             "use strict";
             e.exports = require("assert");
         }, 6113: function (e) {
@@ -4218,7 +4324,7 @@ var _this = this;
         Object.defineProperty(e, "__esModule", { value: true });
         var p = __nccwpck_require__(5681);
         var a = __nccwpck_require__(4128);
-        var d = __nccwpck_require__(5223);
+        var d = __nccwpck_require__(7555);
         var t = __nccwpck_require__(8229);
         var r = /(?<![;}])}/g;
         var s = process.env.GITHUB_TOKEN;
