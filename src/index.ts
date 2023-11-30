@@ -226,6 +226,11 @@ function generateDiff(oldCss: string, newCss: string): string {
                     return change.oldNode.attributes[attr] !== change.newNode.attributes[attr];
                 }));
 
+                // Remove duplicates
+                attributesDiff = attributesDiff.filter((attr, index) => {
+                    return attributesDiff.indexOf(attr) === index;
+                });
+
                 let attributesAdded = attributesDiff.filter((attr) => {
                     // new node has it, but old does not
                     return change.oldNode &&
@@ -256,7 +261,7 @@ function generateDiff(oldCss: string, newCss: string): string {
                         [change.selector]: change.newNode
                     },
                 }
-                console.log(attributesAdded, attributesChanged, attributesDiff);
+                console.log(attributesAdded, attributesRemoved, attributesChanged);
                 for (const attr of attributesAdded) {
                     if (Array.isArray(change.newNode.attributes)) {
                         let str = '';
