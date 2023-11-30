@@ -387,7 +387,7 @@ function generateDiff(oldCss: string, newCss: string): string {
             try {
                 diff = generateDiff(oldContent, newContent);
                 // Prepend the file name
-                diff = `${commitFile.filename}\n${diff}`;
+                diff = `\`${commitFile.filename}\`\n${diff}`;
             } catch (e) {
                 return setFailed(`unable to diff strings: ${e}`);
             }

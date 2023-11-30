@@ -4551,7 +4551,7 @@ var _this = this;
                                     w = "";
                                     try {
                                         w = generateDiff(h, g);
-                                        w = "".concat(a_38.filename, "\n").concat(w);
+                                        w = "`".concat(a_38.filename, "`\n").concat(w);
                                     }
                                     catch (e) {
                                         return [2 /*return*/, { value: (0, p.setFailed)("unable to diff strings: ".concat(e)) }];
