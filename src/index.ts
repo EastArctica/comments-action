@@ -256,7 +256,7 @@ function generateDiff(oldCss: string, newCss: string): string {
                         [change.selector]: change.newNode
                     },
                 }
-
+                console.log(attributesAdded, attributesChanged, attributesDiff);
                 for (const attr of attributesAdded) {
                     if (Array.isArray(change.newNode.attributes)) {
                         let str = '';
