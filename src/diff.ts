@@ -1,16 +1,15 @@
-import cssjson from 'cssjson';
-import { customToCSS } from './cssjson/index.js';
-const { toJSON, toCSS } = cssjson;
+import { toJSON, toCSS, JSONNode } from 'css-convert-json';
+//import { customToCSS } from './cssjson/index.js';
 
 type Change = {
     selector: string,
     type: 'added' | 'removed' | 'changed',
-    oldNode?: cssNode,
-    newNode?: cssNode
+    oldNode?: JSONNode,
+    newNode?: JSONNode
 };
 const semiCss = /(?<![;}])}/g;
 
-function findChanges(oldNode: cssNode, newNode: cssNode): Change[] {
+function findChanges(oldNode: JSONNode, newNode: JSONNode): Change[] {
     let changes: Change[] = [];
 
     // If A doesn't have B's node, The node must've been added
@@ -40,8 +39,8 @@ function findChanges(oldNode: cssNode, newNode: cssNode): Change[] {
                 // attributes can be an array, so we need to check if they're the same
                 if (Array.isArray(oldNode.children[key].attributes[attr]) &&
                     Array.isArray(newNode.children[key].attributes[attr])) {
-                    let oldAttr = oldNode.children[key].attributes[attr] as string[];
-                    let newAttr = newNode.children[key].attributes[attr] as string[];
+                    let oldAttr = oldNode.children[key].attributes[attr] as unknown as string[];
+                    let newAttr = newNode.children[key].attributes[attr] as unknown as string[];
                     if (oldAttr.length !== newAttr.length) {
                         return true;
                     }
@@ -61,8 +60,8 @@ function findChanges(oldNode: cssNode, newNode: cssNode): Change[] {
                 // attributes can be an array, so we need to check if they're the same
                 if (Array.isArray(oldNode.children[key].attributes[attr]) &&
                     Array.isArray(newNode.children[key].attributes[attr])) {
-                    let oldAttr = oldNode.children[key].attributes[attr] as string[];
-                    let newAttr = newNode.children[key].attributes[attr] as string[];
+                    let oldAttr = oldNode.children[key].attributes[attr] as unknown as string[];
+                    let newAttr = newNode.children[key].attributes[attr] as unknown as string[];
                     if (oldAttr.length !== newAttr.length) {
                         return true;
                     }
@@ -141,7 +140,7 @@ export function generateDiff(oldCss: string, newCss: string): string {
                     break;
                 }
 
-                let fakeNode: cssNode = {
+                let fakeNode: JSONNode = {
                     attributes: {},
                     children: {
                         [change.selector]: change.newNode
@@ -186,8 +185,8 @@ export function generateDiff(oldCss: string, newCss: string): string {
                     // If we have multiple of this attribute, we need to verify that they're all the same
                     if (Array.isArray(change.oldNode.attributes[attr]) &&
                         Array.isArray(change.newNode.attributes[attr])) {
-                        let oldAttr = change.oldNode.attributes[attr] as string[];
-                        let newAttr = change.newNode.attributes[attr] as string[];
+                        let oldAttr = change.oldNode.attributes[attr] as unknown as string[];
+                        let newAttr = change.newNode.attributes[attr] as unknown as string[];
                         if (oldAttr.length !== newAttr.length) {
                             return true;
                         }
@@ -212,8 +211,8 @@ export function generateDiff(oldCss: string, newCss: string): string {
                     // If we have multiple of this attribute, we need to verify that they're all the same
                     if (Array.isArray(change.oldNode.attributes[attr]) &&
                         Array.isArray(change.newNode.attributes[attr])) {
-                        let oldAttr = change.oldNode.attributes[attr] as string[];
-                        let newAttr = change.newNode.attributes[attr] as string[];
+                        let oldAttr = change.oldNode.attributes[attr] as unknown as string[];
+                        let newAttr = change.newNode.attributes[attr] as unknown as string[];
                         if (oldAttr.length !== newAttr.length) {
                             return true;
                         }
@@ -268,7 +267,7 @@ export function generateDiff(oldCss: string, newCss: string): string {
                 for (const attr of attributesAdded) {
                     if (Array.isArray(change.newNode.attributes)) {
                         let str = '';
-                        for (const val of change.newNode.attributes[attr] as string[]) {
+                        for (const val of change.newNode.attributes[attr] as unknown as string[]) {
                             str += `LATEX-COLOR-GREEN${val}LATEX-COLOR-WHITE, `;
                         }
                         fakeNode.children[change.selector].attributes[attr] = str.slice(0, -2);
@@ -280,7 +279,7 @@ export function generateDiff(oldCss: string, newCss: string): string {
                 for (const attr of attributesRemoved) {
                     if (Array.isArray(change.oldNode.attributes)) {
                         let str = '';
-                        for (const val of change.oldNode.attributes[attr] as string[]) {
+                        for (const val of change.oldNode.attributes[attr] as unknown as string[]) {
                             str += `LATEX-COLOR-RED${val}LATEX-COLOR-WHITE, `;
                         }
                         fakeNode.children[change.selector].attributes[attr] = str.slice(0, -2);
@@ -293,8 +292,8 @@ export function generateDiff(oldCss: string, newCss: string): string {
                     let str = '';
                     // Find new
                     if (Array.isArray(change.newNode.attributes)) {
-                        for (let i in change.newNode.attributes[attr] as string[]) {
-                            (change.newNode.attributes[attr] as string[])[i] += `LATEX-COLOR-GREEN${change.newNode.attributes[attr][i]}LATEX-COLOR-WHITE`;
+                        for (let i in change.newNode.attributes[attr] as unknown as string[]) {
+                            (change.newNode.attributes[attr] as unknown as string[])[i] += `LATEX-COLOR-GREEN${change.newNode.attributes[attr][i]}LATEX-COLOR-WHITE`;
                         }
                     } else {
                         str = `LATEX-COLOR-GREEN${change.newNode.attributes[attr]}LATEX-COLOR-WHITE`;
@@ -303,8 +302,8 @@ export function generateDiff(oldCss: string, newCss: string): string {
 
                     // Find old
                     if (Array.isArray(change.oldNode.attributes)) {
-                        for (let i in change.newNode.attributes[attr] as string[]) {
-                            (change.newNode.attributes[attr] as string[])[i] += `LATEX-COLOR-GREEN${change.newNode.attributes[attr][i]}LATEX-COLOR-WHITE`;
+                        for (let i in change.newNode.attributes[attr] as unknown as string[]) {
+                            (change.newNode.attributes[attr] as unknown as string[])[i] += `LATEX-COLOR-GREEN${change.newNode.attributes[attr][i]}LATEX-COLOR-WHITE`;
                         }
                     } else {
                         str += `LATEX-COLOR-RED${change.oldNode.attributes[attr]}LATEX-COLOR-WHITE`;
@@ -313,7 +312,7 @@ export function generateDiff(oldCss: string, newCss: string): string {
 
                 }
 
-                let css = customToCSS(fakeNode).trim();
+                let css = toCSS(fakeNode).trim();
                 css = latexEscape(css);
                 css = css.replaceAll('LATEX-COLOR-GREEN', ANSI_GREEN + ANSI_GREEN_BG);
                 css = css.replaceAll('LATEX-COLOR-RED', ANSI_RED + ANSI_RED_BG);
