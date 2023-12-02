@@ -2,7 +2,7 @@
   "name": "comments-action",
   "version": "1.0.8",
   "description": "GitHub Action for posting commit comments in the Discord-Datamining repo",
-  "type": "commonjs",
+  "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build src/index.ts -o out --minify && tsc out/index.js --outDir dist --allowJs --sourceMap false",

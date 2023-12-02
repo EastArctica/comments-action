@@ -1,33 +1,13 @@
 import { info, isDebug, setFailed } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import type { PushEvent } from '@octokit/webhooks-types';
-import { generateDiff, generateDiffCustom } from './diff';
+import { generateDiff, generateDiffCustom } from './diff.js';
 import ansiToSvg from 'ansi-to-svg';
-import fetch from 'node-fetch';
-import FormData from 'form-data';
 import { Blob } from 'buffer';
+import { uploadFile } from './uploader.js';
 
 const token = process.env.GITHUB_TOKEN;
 const uploadToken = process.env.UPLOAD_TOKEN;
-
-type UploadResponse = { status: number, message: string, url: string};
-
-async function uploadFile(blob: Blob, filename: string): Promise<UploadResponse> {
-    const formData = new FormData();
-    formData.append('sharex', blob, filename);
-
-    // Define your fetch request
-    let req = await fetch("https://i.eastarcti.ca/upload", {
-        method: "POST",
-        headers: {
-            "key": uploadToken,
-        },
-        body: formData
-    });
-    let res = await req.json();
-    
-    return res as UploadResponse;
-}
 
 !(async () => {
     try {
@@ -127,7 +107,7 @@ async function uploadFile(blob: Blob, filename: string): Promise<UploadResponse>
 
                 // Upload svg as a file so it can be embedded into the content
                 const svgBlob = new Blob([svg], { type: 'image/svg+xml' });
-                const upload = await uploadFile(svgBlob, 'diff.svg');
+                const upload = await uploadFile(uploadToken, svgBlob, 'diff.svg');
 
                 diff = `\`${commitFile.filename}\`\n![](${upload.url})`;
             } catch (e) {

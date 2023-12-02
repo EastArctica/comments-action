@@ -1,5 +1,6 @@
-import { toJSON, toCSS } from 'cssjson';
-import { customToCSS } from './cssjson';
+import cssjson from 'cssjson';
+import { customToCSS } from './cssjson/index.js';
+const { toJSON, toCSS } = cssjson;
 
 type Change = {
     selector: string,

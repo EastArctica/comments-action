@@ -1,4 +1,4 @@
-import { generateDiffCustom } from "../diff";
+import { generateDiffCustom } from "../diff.js";
 import { readFileSync, writeFileSync } from "fs";
 import ansiToSvg from 'ansi-to-svg';
 

@@ -1,4 +1,4 @@
-import { customToCSS } from ".";
+import { customToCSS } from "./index.js";
 
 export function strAttr(name: string, value: string, depth: number) {
     return '\t'.repeat(depth) + name + ': ' + value + ';\n';

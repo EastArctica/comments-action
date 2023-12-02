@@ -1,8 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateDiffCustom = exports.generateDiff = void 0;
-const cssjson_1 = require("cssjson");
-const cssjson_2 = require("./cssjson");
+import cssjson from 'cssjson';
+import { customToCSS } from './cssjson/index.js';
+const { toJSON, toCSS } = cssjson;
 const semiCss = /(?<![;}])}/g;
 function findChanges(oldNode, newNode) {
     let changes = [];
@@ -105,9 +103,9 @@ function latexEscape(str) {
         .replaceAll('`', '\\`')
         .replaceAll('@', '{@}'); // This makes no sense but you need it
 }
-function generateDiff(oldCss, newCss) {
-    const newNode = (0, cssjson_1.toJSON)(newCss.replaceAll(semiCss, ';}'));
-    const oldNode = (0, cssjson_1.toJSON)(oldCss.replaceAll(semiCss, ';}'));
+export function generateDiff(oldCss, newCss) {
+    const newNode = toJSON(newCss.replaceAll(semiCss, ';}'));
+    const oldNode = toJSON(oldCss.replaceAll(semiCss, ';}'));
     let changes = findChanges(oldNode, newNode);
     let diffStr = '';
     for (const change of changes) {
@@ -122,7 +120,7 @@ function generateDiff(oldCss, newCss) {
                         [change.selector]: change.newNode
                     },
                 };
-                let css = (0, cssjson_1.toCSS)(fakeNode).trim();
+                let css = toCSS(fakeNode).trim();
                 css.split('\n').forEach(line => {
                     // TODO: This only highlights the attribute's value, but not it's name.
                     diffStr += `$\\texttt{\\color{green}${latexEscape(line)}}$\n`;
@@ -139,7 +137,7 @@ function generateDiff(oldCss, newCss) {
                         [change.selector]: change.oldNode
                     },
                 };
-                let css = (0, cssjson_1.toCSS)(fakeNode).trim();
+                let css = toCSS(fakeNode).trim();
                 css.split('\n').forEach(line => {
                     // TODO: This only highlights the attribute's value, but not it's name.
                     diffStr += `$\\texttt{\\color{red}${latexEscape(line)}}$\n`;
@@ -276,7 +274,7 @@ function generateDiff(oldCss, newCss) {
                         fakeNode.children[change.selector].attributes[attr] = str;
                     }
                 }
-                let css = (0, cssjson_2.customToCSS)(fakeNode).trim();
+                let css = customToCSS(fakeNode).trim();
                 css = latexEscape(css);
                 css = css.replaceAll('LATEX-COLOR-GREEN', '\\color{green}');
                 css = css.replaceAll('LATEX-COLOR-RED', '\\color{red}');
@@ -290,15 +288,14 @@ function generateDiff(oldCss, newCss) {
     }
     return diffStr;
 }
-exports.generateDiff = generateDiff;
 const ANSI_GREEN = '\u001b[32m';
 const ANSI_GREEN_BG = '\u001b[42m';
 const ANSI_RED = '\u001b[31m';
 const ANSI_RED_BG = '\u001b[41m';
 const ANSI_RESET = '\u001b[0m';
-function generateDiffCustom(oldCss, newCss) {
-    const newNode = (0, cssjson_1.toJSON)(newCss.replaceAll(semiCss, ';}'));
-    const oldNode = (0, cssjson_1.toJSON)(oldCss.replaceAll(semiCss, ';}'));
+export function generateDiffCustom(oldCss, newCss) {
+    const newNode = toJSON(newCss.replaceAll(semiCss, ';}'));
+    const oldNode = toJSON(oldCss.replaceAll(semiCss, ';}'));
     let changes = findChanges(oldNode, newNode);
     let diffStr = '';
     for (const change of changes) {
@@ -313,7 +310,7 @@ function generateDiffCustom(oldCss, newCss) {
                         [change.selector]: change.newNode
                     },
                 };
-                let css = (0, cssjson_1.toCSS)(fakeNode).trim();
+                let css = toCSS(fakeNode).trim();
                 css.split('\n').forEach(line => {
                     // TODO: This only highlights the attribute's value, but not it's name.
                     diffStr += ANSI_GREEN + ANSI_GREEN_BG + latexEscape(line) + ANSI_RESET + '\n';
@@ -330,7 +327,7 @@ function generateDiffCustom(oldCss, newCss) {
                         [change.selector]: change.oldNode
                     },
                 };
-                let css = (0, cssjson_1.toCSS)(fakeNode).trim();
+                let css = toCSS(fakeNode).trim();
                 css.split('\n').forEach(line => {
                     // TODO: This only highlights the attribute's value, but not it's name.
                     diffStr += ANSI_RED + ANSI_RED_BG + latexEscape(line) + ANSI_RESET + '\n';
@@ -467,7 +464,7 @@ function generateDiffCustom(oldCss, newCss) {
                         fakeNode.children[change.selector].attributes[attr] = str;
                     }
                 }
-                let css = (0, cssjson_2.customToCSS)(fakeNode).trim();
+                let css = customToCSS(fakeNode).trim();
                 css = latexEscape(css);
                 css = css.replaceAll('LATEX-COLOR-GREEN', ANSI_GREEN + ANSI_GREEN_BG);
                 css = css.replaceAll('LATEX-COLOR-RED', ANSI_RED + ANSI_RED_BG);
@@ -481,5 +478,3 @@ function generateDiffCustom(oldCss, newCss) {
     }
     return diffStr;
 }
-exports.generateDiffCustom = generateDiffCustom;
-//# sourceMappingURL=diff.js.map

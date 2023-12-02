@@ -1,4 +1,4 @@
-import { strAttr, strNode } from "./helpers";
+import { strAttr, strNode } from "./helpers.js";
 
 export function customToCSS(node: cssNode, depth?: number, breaks?: boolean) {
     var cssString = '';

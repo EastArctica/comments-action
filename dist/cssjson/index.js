@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.customToCSS = void 0;
-const helpers_1 = require("./helpers");
-function customToCSS(node, depth, breaks) {
+import { strAttr, strNode } from "./helpers.js";
+export function customToCSS(node, depth, breaks) {
     var cssString = '';
     if (typeof depth == 'undefined') {
         depth = 0;
@@ -15,11 +12,11 @@ function customToCSS(node, depth, breaks) {
             var att = node.attributes[i];
             if (att instanceof Array) {
                 for (var j = 0; j < att.length; j++) {
-                    cssString += (0, helpers_1.strAttr)(i, att[j], depth);
+                    cssString += strAttr(i, att[j], depth);
                 }
             }
             else {
-                cssString += (0, helpers_1.strAttr)(i, att, depth);
+                cssString += strAttr(i, att, depth);
             }
         }
     }
@@ -32,11 +29,9 @@ function customToCSS(node, depth, breaks) {
             else {
                 first = false;
             }
-            cssString += (0, helpers_1.strNode)(i, node.children[i], depth);
+            cssString += strNode(i, node.children[i], depth);
         }
     }
     return cssString;
 }
-exports.customToCSS = customToCSS;
 ;
-//# sourceMappingURL=index.js.map
