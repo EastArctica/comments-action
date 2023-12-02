@@ -1,7 +1,7 @@
 import { info, isDebug, setFailed } from '@actions/core';
 import { context, getOctokit } from '@actions/github';
 import type { PushEvent } from '@octokit/webhooks-types';
-import { generateDiff, generateDiffCustom } from './diff.js';
+import { generateDiff } from './diff.js';
 import ansiToSvg from 'ansi-to-svg';
 import { Blob } from 'buffer';
 import { uploadFile } from './uploader.js';
@@ -71,7 +71,7 @@ const uploadToken = process.env.UPLOAD_TOKEN;
 
             let diff = '';
             try {
-                const rawDiff = generateDiffCustom(oldContent, newContent).trim();
+                const rawDiff = generateDiff(oldContent, newContent).trim();
                 let svg = ansiToSvg(rawDiff, {
                     // Defaults to  2x for Retina compatibility
                     scale: 2,
@@ -111,6 +111,7 @@ const uploadToken = process.env.UPLOAD_TOKEN;
 
                 diff = `\`${commitFile.filename}\`\n![](${upload.url})`;
             } catch (e) {
+                console.log(e);
                 return setFailed(`unable to diff strings: ${e}`);
             }
 

@@ -1,11 +1,11 @@
-import { generateDiffCustom } from "../diff.js";
+import { generateDiff } from "../diff.js";
 import { readFileSync, writeFileSync } from "fs";
 import ansiToSvg from 'ansi-to-svg';
 
 const oldContent = readFileSync('./css/old.app.css', 'utf8');
 const newContent = readFileSync('./css/new.app.css', 'utf8');
 
-const diff = generateDiffCustom(oldContent, newContent).trim();
+const diff = generateDiff(oldContent, newContent).trim();
 let svg = ansiToSvg(diff, {
 	// Defaults to  2x for Retina compatibility
 	scale: 2,
