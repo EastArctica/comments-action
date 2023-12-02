@@ -105,11 +105,10 @@ const uploadToken = process.env.UPLOAD_TOKEN;
                     }
                 }).replace('SauceCodePro Nerd Font, Source Code Pro, Courier', 'ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace');                
 
-                // Upload svg as a file so it can be embedded into the content
                 const svgBlob = new Blob([svg], { type: 'image/svg+xml' });
                 const upload = await uploadFile(uploadToken, svgBlob, 'diff.svg');
 
-                diff = `\`${commitFile.filename}\`\n![](${upload.url})`;
+                diff = `\`${commitFile.filename}\`\n![](https://i.eastarcti.ca/${upload.url})`;
             } catch (e) {
                 console.log(e);
                 return setFailed(`unable to diff strings: ${e}`);
