@@ -52,7 +52,7 @@ const uploadToken = process.env.UPLOAD_TOKEN;
             let newFileSha = commitFile.sha;
             const oldFileSha = oldTree?.data?.tree?.find?.(file => file.path === commitFile.filename)?.sha;
             if (!oldFileSha) {
-                return info('Failed to find old file.');
+                return info('Failed to find old css.');
             }
 
             const oldFile = await octokit.rest.git.getBlob({
@@ -72,6 +72,10 @@ const uploadToken = process.env.UPLOAD_TOKEN;
             let diff = '';
             try {
                 const rawDiff = generateDiff(oldContent, newContent).trim();
+                if (!diff) {
+                    return info('No CSS changed.')
+                }
+
                 let svg = ansiToSvg(rawDiff, {
                     // Defaults to  2x for Retina compatibility
                     scale: 2,
@@ -111,11 +115,7 @@ const uploadToken = process.env.UPLOAD_TOKEN;
                 diff = `\`${commitFile.filename}\`\n![](https://i.eastarcti.ca/${upload.url})`;
             } catch (e) {
                 console.log(e);
-                return setFailed(`unable to diff strings: ${e}`);
-            }
-
-            if (!diff) {
-                return info('no strings changed');
+                return setFailed(`Failed to diff CSS: ${e}`);
             }
 
             await octokit.rest.repos.createCommitComment({
