@@ -1,4 +1,4 @@
-import { toJSON, toCSS, JSONNode } from 'css-convert-json';
+import { toJSON, toCSS, JSONNode, CssAttributes } from 'css-convert-json';
 //import { customToCSS } from './cssjson/index.js';
 
 type Change = {
@@ -8,6 +8,94 @@ type Change = {
     newNode?: JSONNode
 };
 const semiCss = /(?<![;}])}/g;
+
+
+// Returns an array of attribute names where the content has changed
+function diffAttributes(oldAttributes: CssAttributes, newAttributes: CssAttributes): string[] {
+    // We also need to check if the node's attributes are different
+    let attributesDiff = Object.keys(oldAttributes).filter((attr) => {
+        // attributes can be an array, so we need to check if they're the same
+        if (Array.isArray(oldAttributes[attr]) &&
+            Array.isArray(newAttributes[attr])) {
+            let oldAttr = oldAttributes[attr] as unknown as string[];
+            let newAttr = newAttributes[attr] as unknown as string[];
+            if (oldAttr.length !== newAttr.length) {
+                return true;
+            }
+
+            for (const attr of oldAttr) {
+                if (!oldAttr.includes(attr)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Workaround a weird discord compilation thing where it randomly decides to use px or rem.
+        if (oldAttributes[attr] !== newAttributes[attr]) {
+            // TODO: For now we just multiply by the default document size (16px) and determine if they're equal
+            if (oldAttributes[attr].endsWith('rem') && newAttributes[attr].endsWith('px')) {
+                // rem -> px
+                let remValue = Number(oldAttributes[attr].slice(0, -3));
+                let pxValue = Number(newAttributes[attr].slice(0, -2));
+                return (remValue * 16) !== pxValue;
+            } else if (oldAttributes[attr].endsWith('px') && newAttributes[attr].endsWith('rem')) {
+                // px -> rem
+                let remValue = Number(newAttributes[attr].slice(0, -3));
+                let pxValue = Number(oldAttributes[attr].slice(0, -2));
+                return (remValue * 16) !== pxValue;
+            }
+
+            return true;
+        }
+
+        return false;
+    });
+    // Add the rest into the diff
+    attributesDiff = attributesDiff.concat(Object.keys(newAttributes).filter((attr) => {
+        // attributes can be an array, so we need to check if they're the same
+        if (Array.isArray(oldAttributes[attr]) &&
+            Array.isArray(newAttributes[attr])) {
+            let oldAttr = oldAttributes[attr] as unknown as string[];
+            let newAttr = newAttributes[attr] as unknown as string[];
+            if (oldAttr.length !== newAttr.length) {
+                return true;
+            }
+
+            for (const attr of oldAttr) {
+                if (!oldAttr.includes(attr)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Workaround a weird discord compilation thing where it randomly decides to use px or rem.
+        if (oldAttributes[attr] !== newAttributes[attr]) {
+            // TODO: For now we just multiply by the default document size (16px) and determine if they're equal
+            if (oldAttributes[attr].endsWith('rem') && newAttributes[attr].endsWith('px')) {
+                // rem -> px
+                let remValue = Number(oldAttributes[attr].slice(0, -3));
+                let pxValue = Number(newAttributes[attr].slice(0, -2));
+                return (remValue * 16) !== pxValue;
+            } else if (oldAttributes[attr].endsWith('px') && newAttributes[attr].endsWith('rem')) {
+                // px -> rem
+                let remValue = Number(newAttributes[attr].slice(0, -3));
+                let pxValue = Number(oldAttributes[attr].slice(0, -2));
+                return (remValue * 16) !== pxValue;
+            }
+
+            return true;
+        }
+
+        return oldAttributes[attr] !== newAttributes[attr];
+    }));
+    
+    // Remove duplicates
+    attributesDiff = [...new Set(attributesDiff)];
+    
+    return attributesDiff;
+}
 
 function findChanges(oldNode: JSONNode, newNode: JSONNode): Change[] {
     let changes: Change[] = [];
@@ -33,51 +121,10 @@ function findChanges(oldNode: JSONNode, newNode: JSONNode): Change[] {
                 });
             }
 
-            // We also need to check if the node's attributes are different
-
-            let attributesDiff = Object.keys(oldNode.children[key].attributes).filter((attr) => {
-                // attributes can be an array, so we need to check if they're the same
-                if (Array.isArray(oldNode.children[key].attributes[attr]) &&
-                    Array.isArray(newNode.children[key].attributes[attr])) {
-                    let oldAttr = oldNode.children[key].attributes[attr] as unknown as string[];
-                    let newAttr = newNode.children[key].attributes[attr] as unknown as string[];
-                    if (oldAttr.length !== newAttr.length) {
-                        return true;
-                    }
-
-                    for (const attr of oldAttr) {
-                        if (!oldAttr.includes(attr)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-
-                return oldNode.children[key].attributes[attr] !== newNode.children[key].attributes[attr];
-            });
-            // Add the rest into the diff
-            attributesDiff = attributesDiff.concat(Object.keys(newNode.children[key].attributes).filter((attr) => {
-                // attributes can be an array, so we need to check if they're the same
-                if (Array.isArray(oldNode.children[key].attributes[attr]) &&
-                    Array.isArray(newNode.children[key].attributes[attr])) {
-                    let oldAttr = oldNode.children[key].attributes[attr] as unknown as string[];
-                    let newAttr = newNode.children[key].attributes[attr] as unknown as string[];
-                    if (oldAttr.length !== newAttr.length) {
-                        return true;
-                    }
-
-                    for (const attr of oldAttr) {
-                        if (!oldAttr.includes(attr)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-
-                return oldNode.children[key].attributes[attr] !== newNode.children[key].attributes[attr];
-            }));
+            let attributesDiff = diffAttributes(oldNode.children[key].attributes, newNode.children[key].attributes);
 
             if (attributesDiff.length > 0) {
+                // Determine if the only change is 
                 changes.push({
                     selector: key,
                     type: 'changed',
@@ -176,62 +223,7 @@ export function generateDiff(oldCss: string, newCss: string): string {
                     break;
                 }
 
-                // Determine which attributes were added/changed/removed
-                let attributesDiff = Object.keys(change.oldNode.attributes).filter(attr => {
-                    if (!change.oldNode || !change.newNode) {
-                        return false;
-                    }
-
-                    // If we have multiple of this attribute, we need to verify that they're all the same
-                    if (Array.isArray(change.oldNode.attributes[attr]) &&
-                        Array.isArray(change.newNode.attributes[attr])) {
-                        let oldAttr = change.oldNode.attributes[attr] as unknown as string[];
-                        let newAttr = change.newNode.attributes[attr] as unknown as string[];
-                        if (oldAttr.length !== newAttr.length) {
-                            return true;
-                        }
-
-                        for (const attr of oldAttr) {
-                            if (!oldAttr.includes(attr)) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-
-                    return change.oldNode.attributes[attr] !== change.newNode.attributes[attr];
-                });
-
-                // Add the rest into the diff
-                attributesDiff = attributesDiff.concat(Object.keys(change.newNode.attributes).filter((attr) => {
-                    if (!change.oldNode || !change.newNode) {
-                        return false;
-                    }
-
-                    // If we have multiple of this attribute, we need to verify that they're all the same
-                    if (Array.isArray(change.oldNode.attributes[attr]) &&
-                        Array.isArray(change.newNode.attributes[attr])) {
-                        let oldAttr = change.oldNode.attributes[attr] as unknown as string[];
-                        let newAttr = change.newNode.attributes[attr] as unknown as string[];
-                        if (oldAttr.length !== newAttr.length) {
-                            return true;
-                        }
-
-                        for (const attr of oldAttr) {
-                            if (!oldAttr.includes(attr)) {
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-
-                    return change.oldNode.attributes[attr] !== change.newNode.attributes[attr];
-                }));
-
-                // Remove duplicates
-                attributesDiff = attributesDiff.filter((attr, index) => {
-                    return attributesDiff.indexOf(attr) === index;
-                });
+                let attributesDiff = diffAttributes(change.oldNode.attributes, change.newNode.attributes)
 
                 let attributesAdded = attributesDiff.filter((attr) => {
                     // new node has it, but old does not
