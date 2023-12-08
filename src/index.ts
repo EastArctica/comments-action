@@ -72,7 +72,7 @@ const uploadToken = process.env.UPLOAD_TOKEN;
             let diff = '';
             try {
                 const rawDiff = generateDiff(oldContent, newContent).trim();
-                if (!diff) {
+                if (!rawDiff) {
                     return info('No CSS changed.')
                 }
 
