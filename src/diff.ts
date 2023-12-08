@@ -34,17 +34,17 @@ function diffAttributes(oldAttributes: CssAttributes, newAttributes: CssAttribut
         // Workaround a weird discord compilation thing where it randomly decides to use px or rem.
         if (oldAttributes[attr] !== newAttributes[attr]) {
             // TODO: For now we just multiply by the default document size (16px) and determine if they're equal
-            // if (oldAttributes[attr].endsWith('rem') && newAttributes[attr].endsWith('px')) {
-            //     // rem -> px
-            //     let remValue = Number(oldAttributes[attr].slice(0, -3));
-            //     let pxValue = Number(newAttributes[attr].slice(0, -2));
-            //     return (remValue * 16) !== pxValue;
-            // } else if (oldAttributes[attr].endsWith('px') && newAttributes[attr].endsWith('rem')) {
-            //     // px -> rem
-            //     let remValue = Number(newAttributes[attr].slice(0, -3));
-            //     let pxValue = Number(oldAttributes[attr].slice(0, -2));
-            //     return (remValue * 16) !== pxValue;
-            // }
+            if (oldAttributes[attr]?.endsWith('rem') && newAttributes[attr]?.endsWith('px')) {
+                // rem -> px
+                let remValue = Number(oldAttributes[attr].slice(0, -3));
+                let pxValue = Number(newAttributes[attr].slice(0, -2));
+                return (remValue * 16) !== pxValue;
+            } else if (oldAttributes[attr]?.endsWith('px') && newAttributes[attr]?.endsWith('rem')) {
+                // px -> rem
+                let remValue = Number(newAttributes[attr].slice(0, -3));
+                let pxValue = Number(oldAttributes[attr].slice(0, -2));
+                return (remValue * 16) !== pxValue;
+            }
 
             return true;
         }
